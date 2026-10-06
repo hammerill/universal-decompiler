@@ -180,9 +180,9 @@ def pyghidra(a) -> int:
             out["written"] = []
         else:
             p = write_config(root, a.agent, out["agents"][a.agent]["entry"])
-            out["written"].append(str(p.relative_to(root)))
+            out["written"].append(p.relative_to(root).as_posix())
             if a.transport == "http":
-                out["written"] += [str(s.relative_to(root)) for s in start_scripts(root, cmd, ghidra)]
+                out["written"] += [s.relative_to(root).as_posix() for s in start_scripts(root, cmd, ghidra)]
     if a.json:
         emit_json(out)
     else:

@@ -164,3 +164,9 @@ the agent never decrypts. Same treatment as Denuvo/SteamStub on PC.
 2. Windows-specific code paths that only CI can exercise: `WinShot.ps1`, `taskkill /T` in `ud run`, the
    pre-push hook under Git for Windows' sh.
 3. Once the GitHub repo is public, `ud kb search` outside a clone syncs from it (`hammerill/universal-decompiler`).
+
+### First Windows CI run
+- The only red job was `test (windows-latest)`: `ud mcp pyghidra --write` reported written files as
+  `.codex\config.toml`, while `mcp.AGENTS` (and the test) use `/`. Decision: every path a `ud` command reports
+  (JSON or text) is `Path.as_posix()`, so output is identical across OSes and comparable with the registry
+  and config values. Applied to `mcp`, `build`, `run`, `assets` and `publish`.

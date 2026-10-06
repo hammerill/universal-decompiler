@@ -114,8 +114,8 @@ def build(root: Path, config: str | None = None, target: str | None = None, jobs
         if d.is_dir():
             exes += [p for p in d.iterdir() if p.is_file() and (p.suffix.lower() == ".exe" or (not p.suffix and os.access(p, os.X_OK)))]
     return dict(ok=rc == 0, stage=stage, exit_code=rc, config=config, seconds=round(time.time() - t0, 1), errors=errors,
-                error_count=nerr, warning_count=nwarn, log=str(logp.relative_to(root) if logp.is_relative_to(root) else logp),
-                executables=[str(p.relative_to(root)) if p.is_relative_to(root) else str(p) for p in exes[:10]])
+                error_count=nerr, warning_count=nwarn, log=(logp.relative_to(root) if logp.is_relative_to(root) else logp).as_posix(),
+                executables=[(p.relative_to(root) if p.is_relative_to(root) else p).as_posix() for p in exes[:10]])
 
 
 def main(a):

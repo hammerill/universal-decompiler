@@ -109,7 +109,7 @@ def data_blob_hashes(root: Path, data_dir: Path, sizes: set[int]) -> dict[str, s
         return {}
     r = subprocess.run(["git", "hash-object", "--no-filters", "--stdin-paths"], cwd=root, input="\n".join(map(str, cands)) + "\n",
                        capture_output=True, text=True)
-    return {sha: str(p.relative_to(root).as_posix()) for sha, p in zip(r.stdout.split(), cands, strict=False)}
+    return {sha: p.relative_to(root).as_posix() for sha, p in zip(r.stdout.split(), cands, strict=False)}
 
 
 def check_files(root: Path, cfg: dict) -> tuple[list[str], list[str], int]:

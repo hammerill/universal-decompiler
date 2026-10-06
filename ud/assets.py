@@ -22,7 +22,7 @@ def check(root=None) -> dict:
     cfg = load_config(root)
     script = root / cfg.get("assets", {}).get("script", "tools/extract_assets.py")
     if not script.exists():
-        usage(f"{script.relative_to(root)} doesn't exist yet: write it (asset-extraction skill; `ud init --scaffold` has a template)")
+        usage(f"{script.relative_to(root).as_posix()} doesn't exist yet: write it (asset-extraction skill; `ud init --scaffold` has a template)")
     data_dir = cfg.get("project", {}).get("data_dir") or "data"
     if shutil.which("uv"):
         cmd = ["uv", "run", "--quiet", "--script", str(script), "--check", "--out", data_dir]
@@ -31,10 +31,10 @@ def check(root=None) -> dict:
     try:
         r = subprocess.run(cmd, cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
     except subprocess.TimeoutExpired:
-        return dict(ok=False, script=str(script.relative_to(root)), error="the check timed out after 10 minutes", missing=[])
+        return dict(ok=False, script=script.relative_to(root).as_posix(), error="the check timed out after 10 minutes", missing=[])
     out = (r.stdout or "") + (r.stderr or "")
     missing = [ln.split(":", 1)[1].strip() for ln in out.splitlines() if ln.lower().startswith("missing:")]
-    return dict(ok=r.returncode == 0 and not missing, exit_code=r.returncode, script=str(script.relative_to(root).as_posix()),
+    return dict(ok=r.returncode == 0 and not missing, exit_code=r.returncode, script=script.relative_to(root).as_posix(),
                 missing=missing, output=out.strip().splitlines()[-30:])
 
 

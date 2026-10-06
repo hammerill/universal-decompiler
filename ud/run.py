@@ -177,7 +177,7 @@ def launch(root: Path, cfg: dict, original: bool, exe_override: str | None, args
         if not shot_done and el >= when:
             f = outdir / f"shot-{int(el)}s.png"
             res = take_shot(f, p.pid, exe)
-            shots.append(dict(file=str(f.relative_to(root)), result=res))
+            shots.append(dict(file=f.relative_to(root).as_posix(), result=res))
             shot_done = True
         if el >= timeout:
             timed_out = True
@@ -195,12 +195,12 @@ def launch(root: Path, cfg: dict, original: bool, exe_override: str | None, args
             if mp.is_file() and mp.stat().st_mtime >= t0 - 1:
                 dst = outdir / mp.name
                 shutil.copy2(mp, dst)
-                logs.append(str(dst.relative_to(root)))
+                logs.append(dst.relative_to(root).as_posix())
     # a crash is death by signal (POSIX: negative return code) or an NTSTATUS exception code (0xC0000005 access
     # violation, ...); a plain non-zero exit is the program's own answer and is reported, not judged
     crashed = not timed_out and rc is not None and (rc < 0 or (rc & 0xFFFFFFFF) >= 0xC0000000)
     return dict(ok=not crashed, crashed=crashed, exe=str(exe), args=args, cwd=str(cwd), pid=p.pid, exit_code=None if timed_out else rc, timed_out=timed_out,
-                seconds=dur, run_dir=str(outdir.relative_to(root)), stdout_tail=tail(outdir / "stdout.txt"),
+                seconds=dur, run_dir=outdir.relative_to(root).as_posix(), stdout_tail=tail(outdir / "stdout.txt"),
                 stderr_tail=tail(outdir / "stderr.txt"), screenshots=shots, logs=logs)
 
 
