@@ -2,7 +2,7 @@
 
 **Skills, the `ud` CLI and a shared knowledge base that let an AI coding agent take a binary you own (a PC
 or console game, or any other program) and produce, on its own, a compilable PC reconstruction of its core
-program**, in the spirit of [re3](https://en.wikipedia.org/wiki/Re3_(software)): readable C++ that builds
+program**: readable C++ that builds
 with CMake on Windows and Linux and runs with the assets extracted from your own copy.
 
 Inspired by universal-modder. Not affiliated with its authors.
