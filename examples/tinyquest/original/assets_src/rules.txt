@@ -1,0 +1,5 @@
+hp=20
+coin_score=10
+exit_bonus=50
+enemy_damage=1
+chase_radius=3

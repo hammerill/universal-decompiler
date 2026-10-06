@@ -1,0 +1,7 @@
+TinyQuest
+You hit a wall.
+You picked up a coin.
+An enemy bites you.
+You reached the exit!
+You have fallen.
+Out of time.

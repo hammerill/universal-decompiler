@@ -1,10 +1,14 @@
-# Python-generated files
+.venv/
 __pycache__/
 *.py[oc]
+uv.lock
+.env
 build/
 dist/
 wheels/
 *.egg-info
-
-# Virtual environments
-.venv
+.pytest_cache/
+.ruff_cache/
+/scratch/
+# the CLI launcher lives in bin/
+!bin/

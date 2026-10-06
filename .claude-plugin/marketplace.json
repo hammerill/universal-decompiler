@@ -1,0 +1,16 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "universal-decompiler",
+  "description": "Skills, the ud CLI and a shared knowledge base for decompiling binaries you own with AI agents.",
+  "owner": {
+    "name": "hammerill",
+    "url": "https://github.com/hammerill"
+  },
+  "plugins": [
+    {
+      "name": "universal-decompiler",
+      "source": "./",
+      "description": "Decompile a binary you own into a compilable C++/CMake PC reconstruction with an AI agent: recon (format, compiler, engine, protections), tool checks, Ghidra via pyghidra-mcp, a function tracker, builds, verification against the original, asset-extraction scripts, a publish guard, and a shared knowledge base of how binaries were decompiled."
+    }
+  ]
+}

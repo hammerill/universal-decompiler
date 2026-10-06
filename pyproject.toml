@@ -1,17 +1,44 @@
 [project]
 name = "universal-decompiler"
 version = "0.1.0"
-description = "Add your description here"
+description = "Skills, the `ud` CLI and a shared knowledge base that let an AI coding agent turn a binary you own into a compilable C++/CMake PC reconstruction: recon, tool checks, pyghidra-mcp setup, progress tracking, builds, runs against the original, asset-extraction checks and a publish guard."
 readme = "README.md"
+license = "MIT"
 authors = [
     { name = "hammerill", email = "kyrylo@hammerill.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pyyaml>=6",
+]
 
 [project.scripts]
-universal-decompiler = "universal_decompiler:main"
+ud = "ud.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/hammerill/universal-decompiler"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
 
 [build-system]
-requires = ["uv_build>=0.12.23,<0.13.0"]
-build-backend = "uv_build"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ud"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py312"
+extend-exclude = [".claude", ".agents", "examples"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B"]
+ignore = ["E501", "E731", "B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

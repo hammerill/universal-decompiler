@@ -1,0 +1,12 @@
+{
+  "name": "universal-decompiler",
+  "description": "Decompile a binary you own into a compilable C++/CMake PC reconstruction with an AI agent: recon (format, compiler, engine, protections), tool checks, Ghidra via pyghidra-mcp, a function tracker, builds, verification against the original, asset-extraction scripts, a publish guard, and a shared knowledge base of how binaries were decompiled.",
+  "author": {
+    "name": "hammerill",
+    "url": "https://github.com/hammerill"
+  },
+  "homepage": "https://github.com/hammerill/universal-decompiler",
+  "repository": "https://github.com/hammerill/universal-decompiler",
+  "license": "MIT",
+  "keywords": ["decompilation", "reverse-engineering", "ghidra", "pyghidra-mcp", "re3", "pc-port", "static-recompilation", "cmake", "knowledge-base", "agent-skills"]
+}

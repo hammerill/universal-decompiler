@@ -1,0 +1,30 @@
+# universal-decompiler settings for this decomp repo (read by ud; written by `ud init`).
+
+[project]
+name = "{name}"
+route = ""            # tools route from `ud scan`, e.g. "native"; `ud tools check` uses it
+data_dir = "data"
+
+[build]
+source_dir = "."
+build_dir = "build"
+config = "Release"
+generator = ""        # e.g. "Ninja"; empty = CMake's default
+options = []          # extra -D options, e.g. ["-DUD_WITH_SDL=OFF"]
+
+[run]
+exe = ""              # the rebuilt program, e.g. "build/bin/game" (".exe" is added on Windows)
+args = []
+cwd = "."
+original = ""         # the original, e.g. "data/game.exe"
+original_args = []
+original_cwd = ""     # default: the original's folder
+logs = []             # log files to collect after a run (globs, relative to the program's cwd)
+
+[assets]
+script = "tools/extract_assets.py"
+
+[publish]
+allow = []            # globs of your own small files the publish guard should let through
+asset_dirs = []       # extra folders that hold extracted assets
+unverifiable = "warn" # "fail" refuses pushes when a remote's visibility can't be checked

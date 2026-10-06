@@ -1,0 +1,6 @@
+{
+  "name": "universal-decompiler",
+  "version": "0.1.0",
+  "description": "Decompile a binary you own into a compilable C++/CMake PC reconstruction with an AI agent: recon (format, compiler, engine, protections), tool checks, Ghidra via pyghidra-mcp, a function tracker, builds, verification against the original, asset-extraction scripts, a publish guard, and a shared knowledge base of how binaries were decompiled.",
+  "contextFileName": "AGENTS.md"
+}

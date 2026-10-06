@@ -1,0 +1,621 @@
+{
+ "version": 1,
+ "functions": [
+  {
+   "address": "0x00401000",
+   "original_name": "_DT_INIT",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "GCC/glibc startup and teardown, not game code",
+   "size": 27
+  },
+  {
+   "address": "0x00401020",
+   "original_name": "FUN_00401020",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "GCC/glibc startup and teardown, not game code",
+   "size": 12
+  },
+  {
+   "address": "0x00401170",
+   "original_name": "__isoc23_strtoul",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401180",
+   "original_name": "__snprintf_chk",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401190",
+   "original_name": "free",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x004011a0",
+   "original_name": "__isoc23_sscanf",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x004011b0",
+   "original_name": "puts",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x004011c0",
+   "original_name": "fclose",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x004011d0",
+   "original_name": "strlen",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x004011e0",
+   "original_name": "__stack_chk_fail",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x004011f0",
+   "original_name": "memcmp",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401200",
+   "original_name": "strcmp",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401210",
+   "original_name": "ftell",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401220",
+   "original_name": "memcpy",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401230",
+   "original_name": "malloc",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401240",
+   "original_name": "fseek",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401250",
+   "original_name": "__printf_chk",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401260",
+   "original_name": "__fread_chk",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401270",
+   "original_name": "fopen",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401280",
+   "original_name": "atoi",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x00401290",
+   "original_name": "fwrite",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x004012a0",
+   "original_name": "__fprintf_chk",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "PLT thunk to libc",
+   "size": 10
+  },
+  {
+   "address": "0x004012b0",
+   "original_name": "entry",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "GCC/glibc startup and teardown, not game code",
+   "size": 38
+  },
+  {
+   "address": "0x004012e0",
+   "original_name": "FUN_004012e0",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "GCC/glibc startup and teardown, not game code",
+   "size": 5
+  },
+  {
+   "address": "0x004012f0",
+   "original_name": "FUN_004012f0",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "GCC/glibc startup and teardown, not game code",
+   "size": 31
+  },
+  {
+   "address": "0x00401320",
+   "original_name": "FUN_00401320",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "GCC/glibc startup and teardown, not game code",
+   "size": 49
+  },
+  {
+   "address": "0x00401360",
+   "original_name": "_FINI_0",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "GCC/glibc startup and teardown, not game code",
+   "size": 32
+  },
+  {
+   "address": "0x00401390",
+   "original_name": "_INIT_0",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "PLT/init thunk",
+   "size": 6
+  },
+  {
+   "address": "0x00401396",
+   "original_name": "FUN_00401396",
+   "name": "rd32",
+   "module": "pak",
+   "status": "verified",
+   "note": "little-endian u32; folded into tools/extract_assets.py (struct)",
+   "size": 31
+  },
+  {
+   "address": "0x004013b5",
+   "original_name": "FUN_004013b5",
+   "name": "rng_next",
+   "module": "world",
+   "status": "verified",
+   "note": "ANSI C LCG, bits 16..30",
+   "size": 30
+  },
+  {
+   "address": "0x004013d3",
+   "original_name": "FUN_004013d3",
+   "name": "load_level",
+   "module": "world",
+   "status": "verified",
+   "note": "",
+   "size": 281
+  },
+  {
+   "address": "0x004014ec",
+   "original_name": "FUN_004014ec",
+   "name": "is_wall",
+   "module": "world",
+   "status": "verified",
+   "note": "unsigned compare = bounds check",
+   "size": 44
+  },
+  {
+   "address": "0x00401518",
+   "original_name": "FUN_00401518",
+   "name": "move_enemies",
+   "module": "world",
+   "status": "verified",
+   "note": "chase/wander; tables at 0x403170 (dy) and 0x403180 (dx)",
+   "size": 549
+  },
+  {
+   "address": "0x0040173d",
+   "original_name": "FUN_0040173d",
+   "name": "world_hash",
+   "module": "world",
+   "status": "verified",
+   "note": "FNV-1a",
+   "size": 216
+  },
+  {
+   "address": "0x00401815",
+   "original_name": "FUN_00401815",
+   "name": "read_file",
+   "module": "platform",
+   "status": "verified",
+   "note": "replaced by platform::read_file",
+   "size": 208
+  },
+  {
+   "address": "0x004018e5",
+   "original_name": "FUN_004018e5",
+   "name": "parse_strings",
+   "module": "text",
+   "status": "verified",
+   "note": "47-char cap; the inlined memcpy is the bulk of the decompiler output",
+   "size": 361
+  },
+  {
+   "address": "0x00401a4e",
+   "original_name": "FUN_00401a4e",
+   "name": "pak_extract",
+   "module": "pak",
+   "status": "verified",
+   "note": "RLE (count, byte) pairs capped at real size; in tools/extract_assets.py",
+   "size": 350
+  },
+  {
+   "address": "0x00401bac",
+   "original_name": "FUN_00401bac",
+   "name": "pak_open",
+   "module": "pak",
+   "status": "verified",
+   "note": "TQPK header + 40-byte entries; reimplemented in tools/extract_assets.py",
+   "size": 357
+  },
+  {
+   "address": "0x00401d11",
+   "original_name": "FUN_00401d11",
+   "name": "parse_rules",
+   "module": "text",
+   "status": "verified",
+   "note": "",
+   "size": 337
+  },
+  {
+   "address": "0x00401e62",
+   "original_name": "FUN_00401e62",
+   "name": "say",
+   "module": "text",
+   "status": "verified",
+   "note": "",
+   "size": 57
+  },
+  {
+   "address": "0x00401e9b",
+   "original_name": "FUN_00401e9b",
+   "name": "bite_check",
+   "module": "world",
+   "status": "verified",
+   "note": "",
+   "size": 115
+  },
+  {
+   "address": "0x00401f0e",
+   "original_name": "FUN_00401f0e",
+   "name": "move_player",
+   "module": "world",
+   "status": "verified",
+   "note": "",
+   "size": 254
+  },
+  {
+   "address": "0x0040200c",
+   "original_name": "FUN_0040200c",
+   "name": "tick",
+   "module": "world",
+   "status": "verified",
+   "note": "",
+   "size": 82
+  },
+  {
+   "address": "0x0040205e",
+   "original_name": "FUN_0040205e",
+   "name": "render",
+   "module": "world",
+   "status": "verified",
+   "note": "",
+   "size": 196
+  },
+  {
+   "address": "0x00402122",
+   "original_name": "FUN_00402122",
+   "name": "main",
+   "module": "main",
+   "status": "verified",
+   "note": "arg parsing compiled into a tangled flow; same semantics",
+   "size": 1182
+  },
+  {
+   "address": "0x004025c0",
+   "original_name": "_DT_FINI",
+   "name": null,
+   "module": "crt",
+   "status": "skipped",
+   "note": "GCC/glibc startup and teardown, not game code",
+   "size": 13
+  },
+  {
+   "address": "0x00409000",
+   "original_name": "__isoc23_strtoul",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409008",
+   "original_name": "__snprintf_chk",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409010",
+   "original_name": "free",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409018",
+   "original_name": "__libc_start_main",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409020",
+   "original_name": "__isoc23_sscanf",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409028",
+   "original_name": "puts",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409030",
+   "original_name": "fclose",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409038",
+   "original_name": "strlen",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409040",
+   "original_name": "__stack_chk_fail",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409048",
+   "original_name": "memcmp",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409050",
+   "original_name": "strcmp",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409058",
+   "original_name": "ftell",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409060",
+   "original_name": "__gmon_start__",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409068",
+   "original_name": "memcpy",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409070",
+   "original_name": "malloc",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409078",
+   "original_name": "fseek",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409080",
+   "original_name": "__printf_chk",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409088",
+   "original_name": "__fread_chk",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409090",
+   "original_name": "fopen",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x00409098",
+   "original_name": "atoi",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x004090a0",
+   "original_name": "fwrite",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  },
+  {
+   "address": "0x004090a8",
+   "original_name": "__fprintf_chk",
+   "name": null,
+   "module": "imports",
+   "status": "skipped",
+   "note": "Ghidra EXTERNAL block (libc import)",
+   "size": 1
+  }
+ ],
+ "sources": [
+  "build/functions.json",
+  "build/mcp-symbols.json"
+ ]
+}

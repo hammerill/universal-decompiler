@@ -1,0 +1,98 @@
+[
+ {
+  "path": "tooling/ghidra-headless-export-and-decompile.md",
+  "kind": "topic",
+  "title": "Ghidra headless: export the function list and decompile everything for ud",
+  "family": "tooling",
+  "tags": [
+   "ghidra",
+   "headless",
+   "analyzeHeadless",
+   "ud-funcs"
+  ],
+  "tools": [
+   "Ghidra 12.1.4",
+   "JDK 25 (Temurin)",
+   "ud 0.1.0"
+  ],
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-06",
+  "links": []
+ },
+ {
+  "path": "tooling/oracle-comparisons-with-ud-run.md",
+  "kind": "topic",
+  "title": "Oracle comparisons with ud run --compare",
+  "family": "tooling",
+  "tags": [
+   "verification",
+   "oracle",
+   "ud-run",
+   "determinism"
+  ],
+  "tools": [
+   "ud 0.1.0"
+  ],
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-06",
+  "links": []
+ },
+ {
+  "path": "tooling/pyghidra-mcp-setup.md",
+  "kind": "topic",
+  "title": "Setting up pyghidra-mcp for an agent in a decomp repo",
+  "family": "tooling",
+  "tags": [
+   "pyghidra-mcp",
+   "ghidra",
+   "mcp",
+   "setup"
+  ],
+  "tools": [
+   "pyghidra-mcp 0.2.7",
+   "Ghidra 12.1.4",
+   "JDK 25 (Temurin)"
+  ],
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-06",
+  "links": [
+   "https://github.com/clearbluejar/pyghidra-mcp"
+  ]
+ },
+ {
+  "path": "tooling/reading-optimised-decompiler-output.md",
+  "kind": "topic",
+  "title": "Reading optimised decompiler output when porting to C++",
+  "family": "tooling",
+  "tags": [
+   "ghidra",
+   "decompiler",
+   "optimisation",
+   "porting",
+   "cpp"
+  ],
+  "tools": [
+   "Ghidra 12.1.4",
+   "GCC 13.3"
+  ],
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-06",
+  "links": []
+ }
+]

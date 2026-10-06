@@ -1,0 +1,71 @@
+name: test
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run ruff check
+      - name: skills in sync
+        run: python3 scripts/sync_skills.py --check
+      - name: knowledge base
+        run: ./bin/ud kb check --index
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+      - run: uv run pytest -q -ra
+      - name: every help screen
+        shell: bash
+        run: |
+          uv run ud --help > /dev/null
+          for g in init scan tools mcp funcs build run assets publish kb; do uv run ud $g --help > /dev/null; done
+      - name: installs as a uv tool
+        shell: bash
+        run: |
+          uv tool install .
+          UD="$(uv tool dir --bin)/ud"
+          "$UD" --version
+          "$UD" tools list > /dev/null
+
+  example:
+    # the worked example end to end: build the stripped original, extract its assets, build the
+    # reconstruction and compare both programs' output (MSVC x64 on Windows, GCC x86-64 on Linux)
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run python examples/tinyquest/run_example.py
+
+  scaffold-sdl3:
+    # ud init --scaffold with the SDL3 backend (FetchContent builds SDL3), headless run
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: scaffold, build with SDL3, run headless
+        shell: bash
+        run: |
+          UD="uv run --project $GITHUB_WORKSPACE ud"
+          mkdir "$RUNNER_TEMP/decomp" && cd "$RUNNER_TEMP/decomp" && git init -q
+          $UD init --scaffold
+          if [ "$RUNNER_OS" = "Linux" ]; then $UD build -D UD_SDL_MINIMAL=ON; else $UD build; fi
+          $UD run --exe build/bin/game --timeout 60 -- --headless --frames 3

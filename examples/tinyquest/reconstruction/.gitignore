@@ -1,0 +1,19 @@
+# >>> universal-decompiler (ud init)
+# never commit the original or anything extracted from it
+data/
+build/
+out/
+*.exe
+*.dll
+*.so
+*.dylib
+extracted/
+assets/extracted/
+# Ghidra / pyghidra-mcp projects embed the binary
+ghidra/
+pyghidra_mcp_projects/
+*.gpr
+*.rep/
+*.gzf
+.env
+# <<< universal-decompiler

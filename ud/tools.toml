@@ -1,0 +1,803 @@
+# Tool registry for `ud tools check` and `ud scan`. Adding a tool or a route needs no code change.
+#
+# [tools.<id>]
+#   name, description, homepage
+#   bin              executables to look for on PATH (any one is enough)
+#   env              an environment variable pointing at the tool's folder (or file);
+#   env_files        files that must exist inside that folder (any one), e.g. ["ghidraRun", "ghidraRun.bat"]
+#   paths            extra file locations to probe (env vars like %ProgramFiles(x86)% and ~ are expanded)
+#   pkgconfig        a pkg-config module name (Linux/macOS)
+#   python_module    importable with the system python3/python
+#   ghidra_extension an installed Ghidra extension folder name (looked up under GHIDRA_INSTALL_DIR and ~/.ghidra)
+#   version          arguments that print the version (stdout or stderr), version_regex picks it out
+#   version_file     a file (relative to the found folder) holding the version; version_regex picks it out
+#   min_version      dotted minimum, compared numerically
+#   platforms        where it runs at all (default: windows, linux)
+#   install.windows / install.linux   exact steps shown to the user; ud never runs them
+#
+# [routes.<id>]  label, required = [...], optional = [...]
+# Every route lists its base tools explicitly so a route reads on its own.
+#
+# Versions and install methods were checked against official sources on 2026-10-06 (see DEVLOG.md).
+
+# ----------------------------------------------------------------------------- base
+
+[tools.git]
+name = "Git"
+description = "version control for the local decomp repo"
+homepage = "https://git-scm.com"
+bin = ["git"]
+version = ["--version"]
+version_regex = 'git version ([0-9.]+)'
+install.windows = "winget install --id Git.Git -e"
+install.linux = "sudo apt install git   # Fedora: sudo dnf install git   Arch: sudo pacman -S git"
+
+[tools.cmake]
+name = "CMake"
+description = "build system generator for the reconstruction (3.20 or newer)"
+homepage = "https://cmake.org/download/"
+bin = ["cmake"]
+version = ["--version"]
+version_regex = 'cmake version ([0-9.]+)'
+min_version = "3.20"
+install.windows = "winget install --id Kitware.CMake -e   # or the 'C++ CMake tools' component of Visual Studio"
+install.linux = "sudo apt install cmake   # older distros: pip install cmake  or  https://cmake.org/download/"
+
+[tools.cxx]
+name = "C++ compiler (MSVC on Windows, GCC or Clang on Linux)"
+description = "compiles the C++17 reconstruction"
+homepage = "https://visualstudio.microsoft.com/downloads/"
+bin = ["cl", "g++", "clang++", "c++"]
+paths = ["%ProgramFiles(x86)%/Microsoft Visual Studio/Installer/vswhere.exe"]
+version = ["--version"]
+version_regex = '([0-9]+\.[0-9]+(\.[0-9]+)?)'
+install.windows = """Install Visual Studio 2022 (Community is fine) or the Build Tools with the "Desktop development with C++" workload:
+  winget install --id Microsoft.VisualStudio.2022.BuildTools -e --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --passive"
+CMake finds MSVC by itself; `cl` is only on PATH inside a "Developer PowerShell"."""
+install.linux = "sudo apt install build-essential   # or: sudo apt install clang   Fedora: sudo dnf install gcc-c++"
+
+[tools.ninja]
+name = "Ninja"
+description = "fast CMake generator (optional; CMake picks its default otherwise)"
+homepage = "https://ninja-build.org"
+bin = ["ninja"]
+version = ["--version"]
+version_regex = '([0-9.]+)'
+install.windows = "winget install --id Ninja-build.Ninja -e"
+install.linux = "sudo apt install ninja-build"
+
+[tools.python]
+name = "Python 3.12+"
+description = "runs ud itself and tools/extract_assets.py"
+homepage = "https://www.python.org/downloads/"
+bin = ["python3", "python"]
+version = ["--version"]
+version_regex = 'Python ([0-9.]+)'
+min_version = "3.12"
+install.windows = "winget install --id Python.Python.3.12 -e   # or let uv manage it: uv python install 3.12"
+install.linux = "sudo apt install python3   # or: uv python install 3.12"
+
+[tools.uv]
+name = "uv"
+description = "runs `ud` and the PEP 723 asset-extraction script with their dependencies"
+homepage = "https://docs.astral.sh/uv/getting-started/installation/"
+bin = ["uv"]
+version = ["--version"]
+version_regex = 'uv ([0-9.]+)'
+install.windows = "powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"   # or: winget install --id astral-sh.uv -e"
+install.linux = "curl -LsSf https://astral.sh/uv/install.sh | sh"
+
+[tools.sdl3]
+name = "SDL3 development files"
+description = "default platform-layer backend (the CMake skeleton fetches SDL3 itself when it isn't installed)"
+homepage = "https://github.com/libsdl-org/SDL/releases"
+pkgconfig = "sdl3"
+env = "SDL3_DIR"
+env_files = ["SDL3Config.cmake", "cmake/SDL3Config.cmake", "lib/cmake/SDL3/SDL3Config.cmake"]
+install.windows = "vcpkg install sdl3   # or download SDL3-devel-3.x-VC.zip from https://github.com/libsdl-org/SDL/releases and set SDL3_DIR to its cmake/ folder"
+install.linux = """sudo apt install libsdl3-dev   # Ubuntu 25.04+ / Debian 13+
+Older distros: CMake's FetchContent builds SDL3, which needs SDL's Linux build dependencies first (list:
+https://wiki.libsdl.org/SDL3/README-linux#build-dependencies), e.g. on Ubuntu 24.04:
+  sudo apt install libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+    libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libegl1-mesa-dev libwayland-dev libdecor-0-dev \
+    libasound2-dev libpulse-dev libpipewire-0.3-dev libdbus-1-dev libibus-1.0-dev libudev-dev
+Headless only (CI, oracle runs): build with -D UD_SDL_MINIMAL=ON and none of these are needed."""
+
+[tools.screenshot-x11]
+name = "xdotool + ImageMagick (window screenshots on X11)"
+description = "lets `ud run --shot` find the window by PID and capture it on Linux/X11"
+homepage = "https://github.com/jordansissel/xdotool"
+bin = ["xdotool"]
+platforms = ["linux"]
+version = ["--version"]
+version_regex = 'xdotool version ([0-9.]+)'
+install.linux = "sudo apt install xdotool imagemagick   # Wayland: sudo apt install grim (captures the whole screen)"
+
+# ----------------------------------------------------------------------------- native: Ghidra + pyghidra-mcp
+
+[tools.jdk]
+name = "JDK 21 or newer (64-bit)"
+description = "Ghidra 12.1 runs on JDK 21 (Ghidra 12.2 moves to JDK 25)"
+homepage = "https://adoptium.net/temurin/releases/"
+bin = ["java"]
+version = ["-version"]
+version_regex = 'version "([0-9]+(\.[0-9]+)*)'
+min_version = "21"
+install.windows = "winget install --id EclipseAdoptium.Temurin.21.JDK -e"
+install.linux = "sudo apt install openjdk-21-jdk   # Fedora: sudo dnf install java-21-openjdk-devel"
+
+[tools.ghidra]
+name = "Ghidra 12.1+"
+description = "the decompiler (headless analysis, pyghidra-mcp backend)"
+homepage = "https://github.com/NationalSecurityAgency/ghidra/releases"
+env = "GHIDRA_INSTALL_DIR"
+env_files = ["ghidraRun", "ghidraRun.bat", "support/analyzeHeadless", "support/analyzeHeadless.bat"]
+bin = ["ghidraRun"]
+version_file = "Ghidra/application.properties"
+version_regex = 'application\.version=([0-9.]+)'
+min_version = "12.0"
+install.windows = """1. Download ghidra_12.1.4_PUBLIC_<date>.zip from https://github.com/NationalSecurityAgency/ghidra/releases/latest
+2. Extract it, e.g. to C:\\Tools\\ghidra_12.1.4_PUBLIC
+3. setx GHIDRA_INSTALL_DIR "C:\\Tools\\ghidra_12.1.4_PUBLIC"   (then open a new terminal)"""
+install.linux = """1. Download ghidra_12.1.4_PUBLIC_<date>.zip from https://github.com/NationalSecurityAgency/ghidra/releases/latest
+2. unzip it, e.g. to ~/tools/ghidra_12.1.4_PUBLIC
+3. echo 'export GHIDRA_INSTALL_DIR="$HOME/tools/ghidra_12.1.4_PUBLIC"' >> ~/.bashrc   (then open a new terminal)"""
+
+[tools.pyghidra-mcp]
+name = "pyghidra-mcp"
+description = "MCP server that lets the agent decompile, rename, retype and search in Ghidra (`ud mcp pyghidra` writes the config)"
+homepage = "https://github.com/clearbluejar/pyghidra-mcp"
+bin = ["pyghidra-mcp"]
+version = ["--version"]
+version_regex = '([0-9]+\.[0-9]+\.[0-9]+)'
+install.windows = "uv tool install pyghidra-mcp   # needs GHIDRA_INSTALL_DIR and the JDK"
+install.linux = "uv tool install pyghidra-mcp   # needs GHIDRA_INSTALL_DIR and the JDK"
+
+[tools.x64dbg]
+name = "x64dbg"
+description = "debugger for the hybrid (DLL-injection) route on Windows"
+homepage = "https://github.com/x64dbg/x64dbg/releases"
+bin = ["x64dbg", "x32dbg"]
+env = "X64DBG_DIR"
+env_files = ["release/x64/x64dbg.exe", "x64/x64dbg.exe", "x96dbg.exe"]
+platforms = ["windows"]
+install.windows = "Download the latest snapshot from https://github.com/x64dbg/x64dbg/releases, extract it, and set X64DBG_DIR to the extracted folder"
+
+[tools.gdb]
+name = "GDB"
+description = "debugger for the rebuilt program on Linux"
+homepage = "https://www.sourceware.org/gdb/"
+bin = ["gdb", "lldb"]
+version = ["--version"]
+version_regex = '([0-9]+\.[0-9]+)'
+platforms = ["linux"]
+install.linux = "sudo apt install gdb"
+
+[tools.7zip]
+name = "7-Zip"
+description = "unpacks archives, ISO9660 images and zip-based game packages"
+homepage = "https://www.7-zip.org"
+bin = ["7z", "7zz", "7za"]
+paths = ["%ProgramFiles%/7-Zip/7z.exe"]
+install.windows = "winget install --id 7zip.7zip -e"
+install.linux = "sudo apt install 7zip   # older distros: p7zip-full"
+
+# ----------------------------------------------------------------------------- managed
+
+[tools.dotnet]
+name = ".NET SDK"
+description = "builds the recovered C# solution and runs ilspycmd"
+homepage = "https://dotnet.microsoft.com/download"
+bin = ["dotnet"]
+version = ["--version"]
+version_regex = '([0-9]+\.[0-9]+\.[0-9]+)'
+min_version = "8.0"
+install.windows = "winget install --id Microsoft.DotNet.SDK.10 -e"
+install.linux = "sudo apt install dotnet-sdk-10.0   # or: https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual"
+
+[tools.ilspycmd]
+name = "ilspycmd"
+description = "ILSpy's command line: decompiles .NET assemblies to a C# project (-p -o)"
+homepage = "https://www.nuget.org/packages/ilspycmd"
+bin = ["ilspycmd"]
+version = ["--version"]
+version_regex = '([0-9]+\.[0-9]+\.[0-9]+)'
+install.windows = "dotnet tool install --global ilspycmd"
+install.linux = "dotnet tool install --global ilspycmd   # then make sure ~/.dotnet/tools is on PATH"
+
+[tools.assetripper]
+name = "AssetRipper"
+description = "exports a Unity game into a Unity project (assets, scenes, scripts or dummy DLLs)"
+homepage = "https://github.com/AssetRipper/AssetRipper/releases"
+bin = ["AssetRipper.GUI.Free", "AssetRipper"]
+env = "ASSETRIPPER_DIR"
+env_files = ["AssetRipper.GUI.Free.exe", "AssetRipper.GUI.Free"]
+install.windows = "Download AssetRipper_win_x64.zip from https://github.com/AssetRipper/AssetRipper/releases/latest, extract it, and setx ASSETRIPPER_DIR \"<extracted folder>\""
+install.linux = "Download AssetRipper_linux_x64.zip from https://github.com/AssetRipper/AssetRipper/releases/latest, unzip it, chmod +x AssetRipper.GUI.Free, and export ASSETRIPPER_DIR=<folder>"
+
+[tools.cpp2il]
+name = "Cpp2IL"
+description = "recovers types, signatures and dummy DLLs from GameAssembly + global-metadata.dat (IL2CPP)"
+homepage = "https://github.com/SamboyCoding/Cpp2IL"
+bin = ["Cpp2IL", "Cpp2IL-Win", "Cpp2IL-Linux"]
+env = "CPP2IL"
+env_files = ["Cpp2IL.exe", "Cpp2IL", "Cpp2IL-Win.exe", "Cpp2IL-Linux"]
+install.windows = "Download Cpp2IL-net9-win-x64.zip (the development build linked from https://github.com/SamboyCoding/Cpp2IL#readme; the last tagged release is from 2022), extract it, and setx CPP2IL \"<folder>\""
+install.linux = "Download Cpp2IL-net9-linux-x64.zip (development build linked from https://github.com/SamboyCoding/Cpp2IL#readme), unzip, chmod +x Cpp2IL, export CPP2IL=<folder>"
+
+[tools.il2cppdumper]
+name = "Il2CppDumper (unmaintained, fallback only)"
+description = "older IL2CPP dumper; no commits since 2024-08, prefer Cpp2IL"
+homepage = "https://github.com/Perfare/Il2CppDumper/releases"
+bin = ["Il2CppDumper"]
+env = "IL2CPPDUMPER_DIR"
+env_files = ["Il2CppDumper.exe", "Il2CppDumper"]
+install.windows = "Download the latest release zip from https://github.com/Perfare/Il2CppDumper/releases and setx IL2CPPDUMPER_DIR \"<folder>\""
+install.linux = "Download the net6 release zip from https://github.com/Perfare/Il2CppDumper/releases and run it with `dotnet Il2CppDumper.dll`"
+
+[tools.unity-editor]
+name = "Unity Editor (the game's exact version)"
+description = "reopens and builds the recovered project; the version comes from `ud scan`"
+homepage = "https://unity.com/download"
+bin = ["Unity", "unityhub", "Unity Hub"]
+env = "UNITY_EDITOR"
+env_files = ["Unity.exe", "Unity", "Editor/Unity.exe", "Editor/Unity"]
+install.windows = "winget install --id Unity.UnityHub -e, then in Unity Hub > Installs > Install Editor > Archive pick the version `ud scan` reported (set UNITY_EDITOR to its folder)"
+install.linux = "Install Unity Hub (https://docs.unity3d.com/hub/manual/InstallHub.html#install-hub-linux), then install the editor version `ud scan` reported and set UNITY_EDITOR to its folder"
+
+[tools.fmodel]
+name = "FModel"
+description = "browses and exports Unreal Engine 4/5 pak/IoStore content (Windows only)"
+homepage = "https://github.com/4sval/FModel/releases"
+bin = ["FModel"]
+env = "FMODEL_DIR"
+env_files = ["FModel.exe"]
+platforms = ["windows"]
+install.windows = "Download FModel.zip from https://github.com/4sval/FModel/releases/latest, extract it, and setx FMODEL_DIR \"<folder>\""
+
+[tools.ue4ss]
+name = "RE-UE4SS"
+description = "dumps Unreal reflection data (headers, object dumps) from the user's own offline copy; never with anti-cheat"
+homepage = "https://github.com/UE4SS-RE/RE-UE4SS/releases"
+env = "UE4SS_DIR"
+env_files = ["UE4SS.dll", "ue4ss/UE4SS.dll", "dwmapi.dll"]
+platforms = ["windows"]
+install.windows = "Download UE4SS_v3.0.1.zip from https://github.com/UE4SS-RE/RE-UE4SS/releases/latest and extract it to a folder (the agent copies it next to the game only with the user's OK); setx UE4SS_DIR \"<folder>\""
+
+[tools.unreal-editor]
+name = "Unreal Editor (the game's engine version)"
+description = "opens the reconstructed project; installed through the Epic Games Launcher or built from source"
+homepage = "https://www.unrealengine.com/download"
+env = "UE_ROOT"
+env_files = ["Engine/Binaries/Win64/UnrealEditor.exe", "Engine/Binaries/Linux/UnrealEditor", "Engine/Binaries/Win64/UE4Editor.exe"]
+install.windows = "Epic Games Launcher > Unreal Engine > Library > + > pick the engine version `ud scan` reported; setx UE_ROOT \"<engine folder>\""
+install.linux = "Download the Linux build from https://www.unrealengine.com/linux (or build from source with Epic's GitHub access) and export UE_ROOT=<engine folder>"
+
+[tools.gdre-tools]
+name = "GDRE Tools"
+description = "recovers a Godot project from a .pck/.exe (gdre_tools --headless --recover=...)"
+homepage = "https://github.com/GDRETools/gdsdecomp/releases"
+bin = ["gdre_tools", "gdre_tools.x86_64", "gdre_tools.exe"]
+env = "GDRE_TOOLS"
+env_files = ["gdre_tools.exe", "gdre_tools.x86_64", "gdre_tools"]
+install.windows = "scoop bucket add games; scoop install gdsdecomp   # or download the Windows zip from https://github.com/GDRETools/gdsdecomp/releases/latest and setx GDRE_TOOLS \"<folder>\""
+install.linux = "Download the Linux zip from https://github.com/GDRETools/gdsdecomp/releases/latest, unzip, chmod +x gdre_tools.x86_64, export GDRE_TOOLS=<folder>"
+
+[tools.godot]
+name = "Godot (the game's exact version)"
+description = "reopens and exports the recovered project"
+homepage = "https://godotengine.org/download/archive/"
+bin = ["godot", "godot4", "godot3", "Godot"]
+env = "GODOT"
+env_files = ["godot.exe", "godot", "Godot.exe"]
+version = ["--version"]
+version_regex = '([0-9]+\.[0-9]+(\.[0-9]+)?)'
+install.windows = "Download the version `ud scan` reported from https://godotengine.org/download/archive/ (Mono build if the game uses C#) and put it on PATH as godot.exe"
+install.linux = "Download the version `ud scan` reported from https://godotengine.org/download/archive/, chmod +x, and put it on PATH as godot"
+
+[tools.undertalemodtool]
+name = "UndertaleModTool / UndertaleModCli"
+description = "decompiles GameMaker data.win (GML, sprites, rooms); the CLI suits agents"
+homepage = "https://github.com/UnderminersTeam/UndertaleModTool/releases"
+bin = ["UndertaleModCli", "UndertaleModTool"]
+env = "UTMT_DIR"
+env_files = ["UndertaleModCli.exe", "UndertaleModCli", "UndertaleModTool.exe"]
+install.windows = "Download the release zip (0.9.2.0 or newer) from https://github.com/UnderminersTeam/UndertaleModTool/releases/latest and setx UTMT_DIR \"<folder>\""
+install.linux = "Download the UndertaleModCli Linux zip from https://github.com/UnderminersTeam/UndertaleModTool/releases/latest and export UTMT_DIR=<folder>"
+
+[tools.gamemaker-ide]
+name = "GameMaker IDE"
+description = "reopens the recovered GameMaker project (optional; the recovered GML is readable without it)"
+homepage = "https://gamemaker.io/download"
+env = "GAMEMAKER_DIR"
+env_files = ["GameMaker.exe", "GameMaker"]
+install.windows = "Download from https://gamemaker.io/download and setx GAMEMAKER_DIR \"<install folder>\""
+install.linux = "Download the Ubuntu beta from https://gamemaker.io/download and export GAMEMAKER_DIR=<install folder>"
+
+# ----------------------------------------------------------------------------- script engines
+
+[tools.node]
+name = "Node.js"
+description = "runs asar and the recovered JS projects"
+homepage = "https://nodejs.org"
+bin = ["node"]
+version = ["--version"]
+version_regex = 'v([0-9.]+)'
+install.windows = "winget install --id OpenJS.NodeJS.LTS -e"
+install.linux = "sudo apt install nodejs npm   # or https://nodejs.org/en/download"
+
+[tools.asar]
+name = "@electron/asar"
+description = "extracts Electron app.asar archives (`asar extract app.asar out/`)"
+homepage = "https://github.com/electron/asar"
+bin = ["asar"]
+version = ["--version"]
+version_regex = '([0-9.]+)'
+install.windows = "npm install -g @electron/asar"
+install.linux = "npm install -g @electron/asar"
+
+[tools.unrpyc]
+name = "unrpyc"
+description = "decompiles Ren'Py .rpyc scripts back to .rpy"
+homepage = "https://github.com/CensoredUsername/unrpyc"
+env = "UNRPYC_DIR"
+env_files = ["unrpyc.py"]
+install.windows = "git clone https://github.com/CensoredUsername/unrpyc C:\\Tools\\unrpyc  (check out the tag matching the game's Ren'Py major version: v2.x for Ren'Py 8, v1.x for 7) and setx UNRPYC_DIR C:\\Tools\\unrpyc"
+install.linux = "git clone https://github.com/CensoredUsername/unrpyc ~/tools/unrpyc  (v2.x for Ren'Py 8, v1.x for 7) and export UNRPYC_DIR=~/tools/unrpyc"
+
+[tools.rpatool]
+name = "rpatool"
+description = "lists and extracts Ren'Py RPA archives (unrpa has had no release since 2019)"
+homepage = "https://github.com/Shizmob/rpatool"
+bin = ["rpatool"]
+env = "RPATOOL"
+env_files = ["rpatool"]
+install.windows = "git clone https://github.com/Shizmob/rpatool C:\\Tools\\rpatool and setx RPATOOL C:\\Tools\\rpatool  (run: python rpatool -x archive.rpa)"
+install.linux = "git clone https://github.com/Shizmob/rpatool ~/tools/rpatool && export RPATOOL=~/tools/rpatool"
+
+[tools.rpgmakerdecrypter]
+name = "RPGMakerDecrypter"
+description = "unpacks RGSS archives (XP/VX/VX Ace). Only for archives, not for encrypted MV/MZ assets"
+homepage = "https://github.com/uuksu/RPGMakerDecrypter/releases"
+bin = ["RPGMakerDecrypter-cli"]
+env = "RPGMAKERDECRYPTER_DIR"
+env_files = ["RPGMakerDecrypter-cli.exe", "RPGMakerDecrypter-cli"]
+install.windows = "Download the CLI zip from https://github.com/uuksu/RPGMakerDecrypter/releases/latest and setx RPGMAKERDECRYPTER_DIR \"<folder>\""
+install.linux = "Download the Linux CLI from https://github.com/uuksu/RPGMakerDecrypter/releases/latest and export RPGMAKERDECRYPTER_DIR=<folder>"
+
+[tools.jpexs]
+name = "JPEXS Free Flash Decompiler"
+description = "decompiles SWF (ActionScript 1-3) and exports a FlashDevelop/Animate project"
+homepage = "https://github.com/jindrapetrik/jpexs-decompiler/releases"
+bin = ["ffdec", "ffdec.sh", "ffdec-cli"]
+env = "JPEXS_DIR"
+env_files = ["ffdec.bat", "ffdec.sh", "ffdec.jar"]
+install.windows = "Download the zip (version 26.3.0 or newer) from https://github.com/jindrapetrik/jpexs-decompiler/releases/latest, extract, setx JPEXS_DIR \"<folder>\" (needs Java 8+)"
+install.linux = "Download the zip from https://github.com/jindrapetrik/jpexs-decompiler/releases/latest, unzip, export JPEXS_DIR=<folder> (needs Java 8+)"
+
+# ----------------------------------------------------------------------------- Java, Python
+
+[tools.vineflower]
+name = "Vineflower"
+description = "Java decompiler (maintained Fernflower fork)"
+homepage = "https://github.com/Vineflower/vineflower/releases"
+bin = ["vineflower"]
+env = "VINEFLOWER_JAR"
+env_files = ["."]
+install.windows = "Download vineflower-1.12.0.jar from https://github.com/Vineflower/vineflower/releases/latest and setx VINEFLOWER_JAR \"C:\\Tools\\vineflower-1.12.0.jar\"  (run: java -jar %VINEFLOWER_JAR% in.jar out/)"
+install.linux = "Download vineflower-1.12.0.jar from https://github.com/Vineflower/vineflower/releases/latest and export VINEFLOWER_JAR=~/tools/vineflower-1.12.0.jar"
+
+[tools.jdk-any]
+name = "JDK (the game's Java version or newer)"
+description = "builds the recovered Gradle/Maven project"
+homepage = "https://adoptium.net/temurin/releases/"
+bin = ["java"]
+version = ["-version"]
+version_regex = 'version "([0-9]+(\.[0-9]+)*)'
+install.windows = "winget install --id EclipseAdoptium.Temurin.21.JDK -e   (pick the major version the game targets)"
+install.linux = "sudo apt install openjdk-21-jdk   (pick the major version the game targets)"
+
+[tools.gradle]
+name = "Gradle"
+description = "builds the recovered Java project (a wrapper in the project replaces a global install)"
+homepage = "https://gradle.org/install/"
+bin = ["gradle", "mvn"]
+version = ["--version"]
+version_regex = '(?:Gradle|Apache Maven) ([0-9.]+)'
+install.windows = "winget install --id Gradle.Gradle -e   # or Maven: winget install --id Apache.Maven -e"
+install.linux = "sdk install gradle   # (SDKMAN) or: sudo apt install maven"
+
+[tools.pyinstxtractor]
+name = "pyinstxtractor"
+description = "extracts PyInstaller archives (the .pyc files) from the executable"
+homepage = "https://github.com/extremecoders-re/pyinstxtractor"
+bin = ["pyinstxtractor-ng", "pyinstxtractor"]
+env = "PYINSTXTRACTOR"
+env_files = ["pyinstxtractor.py"]
+install.windows = "uv tool install pyinstxtractor-ng   # or download pyinstxtractor.py from https://github.com/extremecoders-re/pyinstxtractor and setx PYINSTXTRACTOR \"<folder>\""
+install.linux = "uv tool install pyinstxtractor-ng   # or download pyinstxtractor.py and export PYINSTXTRACTOR=<folder>"
+
+[tools.pylingual]
+name = "PyLingual"
+description = "maintained CPython bytecode decompiler (Python 3.6 to 3.15); uncompyle6/decompyle3 stop at 3.8"
+homepage = "https://github.com/syssec-utd/pylingual"
+bin = ["pylingual"]
+install.windows = "git clone https://github.com/syssec-utd/pylingual C:\\Tools\\pylingual; uv tool install C:\\Tools\\pylingual"
+install.linux = "git clone https://github.com/syssec-utd/pylingual ~/tools/pylingual && uv tool install ~/tools/pylingual"
+
+[tools.pycdc]
+name = "pycdc (Decompyle++)"
+description = "C++ Python bytecode decompiler/disassembler, a second opinion next to PyLingual"
+homepage = "https://github.com/zrax/pycdc"
+bin = ["pycdc"]
+install.windows = "git clone https://github.com/zrax/pycdc; cmake -S pycdc -B pycdc/build; cmake --build pycdc/build --config Release; add pycdc\\build\\Release to PATH"
+install.linux = "git clone https://github.com/zrax/pycdc && cmake -S pycdc -B pycdc/build && cmake --build pycdc/build && sudo cp pycdc/build/pycdc /usr/local/bin/"
+
+# ----------------------------------------------------------------------------- consoles
+
+[tools.splat]
+name = "splat (splat64)"
+description = "splits N64/PS1/PS2/PSP binaries into asm/data/assets from a YAML config"
+homepage = "https://github.com/ethteck/splat"
+python_module = "splat"
+bin = ["splat"]
+install.windows = "uv tool install \"splat64[mips]\"   # or: python -m pip install -U \"splat64[mips]\""
+install.linux = "uv tool install 'splat64[mips]'   # or: python3 -m pip install -U 'splat64[mips]'"
+
+[tools.n64recomp]
+name = "N64Recomp"
+description = "statically recompiles N64 MIPS code into C (pairs with N64ModernRuntime)"
+homepage = "https://github.com/N64Recomp/N64Recomp"
+bin = ["N64Recomp"]
+install.windows = "git clone --recursive https://github.com/N64Recomp/N64Recomp; cmake -S N64Recomp -B N64Recomp/build; cmake --build N64Recomp/build --config Release; add the build folder to PATH"
+install.linux = "git clone --recursive https://github.com/N64Recomp/N64Recomp && cmake -S N64Recomp -B N64Recomp/build && cmake --build N64Recomp/build -j && add N64Recomp/build to PATH"
+
+[tools.ghidra-n64]
+name = "N64LoaderWV (Ghidra extension)"
+description = "loads N64 ROMs in Ghidra"
+homepage = "https://github.com/zeroKilo/N64LoaderWV"
+ghidra_extension = "N64LoaderWV"
+install.windows = "Download the release zip matching your Ghidra version from https://github.com/zeroKilo/N64LoaderWV/releases, then Ghidra > File > Install Extensions > + (the zip) and restart Ghidra"
+install.linux = "Same: release zip for your Ghidra version, Ghidra > File > Install Extensions"
+
+[tools.ghidra-gba]
+name = "GhidraGBA (Ghidra extension, optional)"
+description = "GBA loader; unmaintained since 2021. Without it: raw import as ARM:LE:32:v4t at base 0x08000000"
+homepage = "https://github.com/SiD3W4y/GhidraGBA"
+ghidra_extension = "GhidraGBA"
+install.windows = "Build/install from https://github.com/SiD3W4y/GhidraGBA if it supports your Ghidra; otherwise import the ROM as Raw Binary, language ARM:LE:32:v4t, base 0x08000000"
+install.linux = "Same as Windows"
+
+[tools.ghidra-nds]
+name = "NTRGhidra (Ghidra extension)"
+description = "loads Nintendo DS ROMs (ARM9/ARM7, overlays) in Ghidra"
+homepage = "https://github.com/pedro-javierf/NTRGhidra"
+ghidra_extension = "NTRGhidra"
+install.windows = "Download the release for your Ghidra version from https://github.com/pedro-javierf/NTRGhidra/releases and install it with Ghidra > File > Install Extensions"
+install.linux = "Same as Windows"
+
+[tools.ghidra-psx]
+name = "ghidra_psx_ldr (Ghidra extension)"
+description = "loads PS-X EXEs and adds PsyQ signature matching"
+homepage = "https://github.com/lab313ru/ghidra_psx_ldr"
+ghidra_extension = "ghidra_psx_ldr"
+install.windows = "Download the release for your Ghidra version from https://github.com/lab313ru/ghidra_psx_ldr/releases and install it with Ghidra > File > Install Extensions"
+install.linux = "Same as Windows"
+
+[tools.ghidra-ee]
+name = "ghidra-emotionengine-reloaded (Ghidra extension)"
+description = "PS2 Emotion Engine (R5900) support; successor of the archived beardypig/ghidra-emotionengine"
+homepage = "https://github.com/chaoticgd/ghidra-emotionengine-reloaded"
+ghidra_extension = "ghidra-emotionengine-reloaded"
+install.windows = "Download the release for your Ghidra version from https://github.com/chaoticgd/ghidra-emotionengine-reloaded/releases and install it with Ghidra > File > Install Extensions"
+install.linux = "Same as Windows"
+
+[tools.ghidra-allegrex]
+name = "ghidra-allegrex (Ghidra extension)"
+description = "PSP Allegrex CPU + PRX loader"
+homepage = "https://github.com/kotcrab/ghidra-allegrex"
+ghidra_extension = "ghidra-allegrex"
+install.windows = "Download the release for your Ghidra version from https://github.com/kotcrab/ghidra-allegrex/releases and install it with Ghidra > File > Install Extensions"
+install.linux = "Same as Windows"
+
+[tools.decomp-toolkit]
+name = "decomp-toolkit (dtk)"
+description = "GameCube/Wii DOL/REL analysis, splitting and project generation"
+homepage = "https://github.com/encounter/decomp-toolkit/releases"
+bin = ["dtk", "dtk.exe"]
+version = ["--version"]
+version_regex = '([0-9]+\.[0-9]+\.[0-9]+)'
+install.windows = "Download dtk-windows-x86_64.exe (1.8.4 or newer) from https://github.com/encounter/decomp-toolkit/releases/latest, rename to dtk.exe, put it on PATH"
+install.linux = "Download dtk-linux-x86_64 from https://github.com/encounter/decomp-toolkit/releases/latest, chmod +x, rename to dtk, put it on PATH"
+
+[tools.ghidra-gamecube]
+name = "Ghidra-GameCube-Loader (Ghidra extension)"
+description = "loads DOL/REL files with symbol maps"
+homepage = "https://github.com/Cuyler36/Ghidra-GameCube-Loader"
+ghidra_extension = "Ghidra-GameCube-Loader"
+install.windows = "Download the release for your Ghidra version from https://github.com/Cuyler36/Ghidra-GameCube-Loader/releases and install it with Ghidra > File > Install Extensions"
+install.linux = "Same as Windows"
+
+[tools.objdiff]
+name = "objdiff"
+description = "compares your compiled functions against the original objects (useful when a playbook verifies by matching)"
+homepage = "https://github.com/encounter/objdiff/releases"
+bin = ["objdiff", "objdiff-cli"]
+install.windows = "Download objdiff-windows-x86_64.exe from https://github.com/encounter/objdiff/releases/latest and put it on PATH"
+install.linux = "Download objdiff-linux-x86_64 from https://github.com/encounter/objdiff/releases/latest, chmod +x, put it on PATH"
+
+[tools.ghidra-xbe]
+name = "ghidra-xbe (Ghidra extension)"
+description = "loads original-Xbox XBE files and labels XDK library functions"
+homepage = "https://github.com/XboxDev/ghidra-xbe"
+ghidra_extension = "ghidra-xbe"
+install.windows = "Download the release for your Ghidra version from https://github.com/XboxDev/ghidra-xbe/releases and install it with Ghidra > File > Install Extensions"
+install.linux = "Same as Windows"
+
+[tools.extract-xiso]
+name = "extract-xiso"
+description = "extracts default.xbe/default.xex and data from XDVDFS images"
+homepage = "https://github.com/XboxDev/extract-xiso/releases"
+bin = ["extract-xiso"]
+install.windows = "Download the Windows build from https://github.com/XboxDev/extract-xiso/releases/latest and put extract-xiso.exe on PATH"
+install.linux = "Download the Linux build from https://github.com/XboxDev/extract-xiso/releases/latest (or build with CMake) and put it on PATH"
+
+[tools.ghidra-xex]
+name = "XEXLoaderWV (Ghidra extension)"
+description = "loads Xbox 360 XEX files (decrypted) in Ghidra"
+homepage = "https://github.com/zeroKilo/XEXLoaderWV"
+ghidra_extension = "XEXLoaderWV"
+install.windows = "Download the release matching your Ghidra version (e.g. 12.1.3 for Ghidra 12.1.x) from https://github.com/zeroKilo/XEXLoaderWV/releases and install it with Ghidra > File > Install Extensions"
+install.linux = "Same as Windows"
+
+[tools.xenonrecomp]
+name = "XenonRecomp (+ XenonAnalyse)"
+description = "statically recompiles Xbox 360 PowerPC code into C++; no binary releases, build from source"
+homepage = "https://github.com/hedge-dev/XenonRecomp"
+bin = ["XenonRecomp", "XenonAnalyse"]
+install.windows = "git clone --recursive https://github.com/hedge-dev/XenonRecomp; build with CMake + clang-cl per its README; put XenonRecomp and XenonAnalyse on PATH"
+install.linux = "git clone --recursive https://github.com/hedge-dev/XenonRecomp && build with CMake + Clang per its README; put XenonRecomp and XenonAnalyse on PATH"
+
+[tools.ps2recomp]
+name = "PS2Recomp (experimental)"
+description = "static recompiler for PS2 Emotion Engine code"
+homepage = "https://github.com/ran-j/PS2Recomp"
+bin = ["ps2recomp", "PS2Recomp"]
+install.windows = "git clone --recursive https://github.com/ran-j/PS2Recomp and build per its README; put the binary on PATH"
+install.linux = "git clone --recursive https://github.com/ran-j/PS2Recomp and build per its README; put the binary on PATH"
+
+[tools.ghidra-switch]
+name = "Ghidra-Switch-Loader (Ghidra extension)"
+description = "loads decrypted NSO/NRO/KIP files in Ghidra"
+homepage = "https://github.com/Adubbz/Ghidra-Switch-Loader"
+ghidra_extension = "Ghidra-Switch-Loader"
+install.windows = "Download the release for your Ghidra version from https://github.com/Adubbz/Ghidra-Switch-Loader/releases and install it with Ghidra > File > Install Extensions"
+install.linux = "Same as Windows"
+
+# Emulators: the oracle for console routes (the original's behaviour is the reference).
+[tools.emu-n64]
+name = "ares or simple64 (N64 emulator)"
+description = "runs the original as the oracle"
+homepage = "https://ares-emu.net"
+bin = ["ares", "simple64-gui"]
+install.windows = "winget install --id ares-emulator.ares -e   # or download from https://ares-emu.net"
+install.linux = "flatpak install flathub dev.ares.ares"
+
+[tools.emu-gba]
+name = "mGBA"
+description = "GBA emulator with Lua scripting and a debugger: the oracle"
+homepage = "https://mgba.io/downloads.html"
+bin = ["mgba", "mgba-qt", "mGBA"]
+install.windows = "winget install --id JeffreyPfau.mGBA -e"
+install.linux = "sudo apt install mgba-qt   # or flatpak install flathub io.mgba.mGBA"
+
+[tools.emu-nds]
+name = "melonDS"
+description = "NDS emulator: the oracle"
+homepage = "https://melonds.kuribo64.net"
+bin = ["melonDS"]
+install.windows = "Download from https://melonds.kuribo64.net/downloads.php"
+install.linux = "flatpak install flathub net.kuribo64.melonDS"
+
+[tools.emu-ps1]
+name = "DuckStation"
+description = "PS1 emulator with a debugger: the oracle"
+homepage = "https://github.com/stenzek/duckstation/releases"
+bin = ["duckstation-qt", "duckstation"]
+install.windows = "Download from https://github.com/stenzek/duckstation/releases/latest (needs your own BIOS dump)"
+install.linux = "Download the AppImage from https://github.com/stenzek/duckstation/releases/latest (needs your own BIOS dump)"
+
+[tools.emu-ps2]
+name = "PCSX2"
+description = "PS2 emulator with a debugger: the oracle"
+homepage = "https://pcsx2.net/downloads"
+bin = ["pcsx2", "pcsx2-qt"]
+install.windows = "winget install --id PCSX2Team.PCSX2 -e   (needs your own BIOS dump)"
+install.linux = "flatpak install flathub net.pcsx2.PCSX2   (needs your own BIOS dump)"
+
+[tools.emu-psp]
+name = "PPSSPP"
+description = "PSP emulator with a debugger: the oracle"
+homepage = "https://www.ppsspp.org/download/"
+bin = ["PPSSPPSDL", "ppsspp", "PPSSPPWindows64"]
+install.windows = "winget install --id PPSSPPTeam.PPSSPP -e"
+install.linux = "flatpak install flathub org.ppsspp.PPSSPP"
+
+[tools.emu-gc]
+name = "Dolphin"
+description = "GameCube/Wii emulator with a debugger: the oracle"
+homepage = "https://dolphin-emu.org/download/"
+bin = ["dolphin-emu", "Dolphin"]
+install.windows = "Download from https://dolphin-emu.org/download/"
+install.linux = "flatpak install flathub org.DolphinEmu.dolphin-emu"
+
+[tools.emu-xbox]
+name = "xemu"
+description = "original Xbox emulator: the oracle (needs your own BIOS/EEPROM dumps)"
+homepage = "https://xemu.app"
+bin = ["xemu"]
+install.windows = "Download from https://xemu.app/#download"
+install.linux = "flatpak install flathub app.xemu.xemu"
+
+[tools.emu-xbox360]
+name = "Xenia Canary"
+description = "Xbox 360 emulator: the oracle"
+homepage = "https://github.com/xenia-canary/xenia-canary/releases"
+bin = ["xenia_canary"]
+platforms = ["windows"]
+install.windows = "Download from https://github.com/xenia-canary/xenia-canary/releases"
+
+[tools.emu-ps3]
+name = "RPCS3"
+description = "PS3 emulator: the oracle (needs firmware the user installs from Sony)"
+homepage = "https://rpcs3.net/download"
+bin = ["rpcs3"]
+install.windows = "Download from https://rpcs3.net/download"
+install.linux = "Download the AppImage from https://rpcs3.net/download"
+
+# ============================================================================= routes
+
+[routes.base]
+label = "Base toolchain (every route)"
+required = ["git", "cmake", "cxx", "python", "uv"]
+optional = ["ninja", "sdl3", "screenshot-x11"]
+
+[routes.native]
+label = "Native PC: Ghidra + pyghidra-mcp, C++/CMake reconstruction"
+required = ["git", "cmake", "cxx", "python", "uv", "jdk", "ghidra", "pyghidra-mcp"]
+optional = ["ninja", "sdl3", "x64dbg", "gdb", "7zip", "screenshot-x11"]
+
+[routes.dotnet]
+label = ".NET / XNA / FNA / MonoGame: ilspycmd -> C# solution"
+required = ["git", "python", "uv", "dotnet", "ilspycmd"]
+optional = ["jdk", "ghidra", "pyghidra-mcp"]
+
+[routes.unity-mono]
+label = "Unity (Mono): AssetRipper + ilspycmd -> Unity project"
+required = ["git", "python", "uv", "assetripper", "dotnet", "ilspycmd", "unity-editor"]
+optional = []
+
+[routes.unity-il2cpp]
+label = "Unity (IL2CPP): Cpp2IL + AssetRipper + Ghidra -> Unity project"
+required = ["git", "python", "uv", "cpp2il", "assetripper", "jdk", "ghidra", "pyghidra-mcp", "unity-editor"]
+optional = ["il2cppdumper", "dotnet", "ilspycmd"]
+
+[routes.unreal]
+label = "Unreal Engine: FModel / UE4SS dumps + Ghidra -> editor project"
+required = ["git", "python", "uv", "jdk", "ghidra", "pyghidra-mcp", "unreal-editor"]
+optional = ["fmodel", "ue4ss", "7zip"]
+
+[routes.godot]
+label = "Godot: GDRE Tools -> Godot project"
+required = ["git", "python", "uv", "gdre-tools", "godot"]
+optional = ["dotnet", "ilspycmd"]
+
+[routes.gamemaker]
+label = "GameMaker: UndertaleModTool -> recovered project"
+required = ["git", "python", "uv", "undertalemodtool"]
+optional = ["gamemaker-ide"]
+
+[routes.rpgmaker]
+label = "RPG Maker: unpack + recover"
+required = ["git", "python", "uv", "7zip"]
+optional = ["rpgmakerdecrypter", "node"]
+
+[routes.renpy]
+label = "Ren'Py: rpatool + unrpyc"
+required = ["git", "python", "uv", "rpatool", "unrpyc"]
+optional = []
+
+[routes.love2d]
+label = "LÖVE: unzip the .love / fused exe"
+required = ["git", "python", "uv", "7zip"]
+optional = []
+
+[routes.html5]
+label = "HTML5 / Electron / NW.js: asar extract"
+required = ["git", "python", "uv", "node", "asar"]
+optional = ["7zip"]
+
+[routes.flash-air]
+label = "Adobe AIR / Flash: JPEXS"
+required = ["git", "python", "uv", "jpexs", "jdk-any"]
+optional = ["7zip"]
+
+[routes.java]
+label = "Java: Vineflower -> Gradle/Maven project"
+required = ["git", "python", "uv", "jdk-any", "vineflower"]
+optional = ["gradle", "7zip"]
+
+[routes.python-frozen]
+label = "Python frozen app: pyinstxtractor + PyLingual"
+required = ["git", "python", "uv", "pyinstxtractor", "pylingual"]
+optional = ["pycdc"]
+
+[routes.n64]
+label = "N64 clean-room: splat + Ghidra"
+required = ["git", "cmake", "cxx", "python", "uv", "splat", "jdk", "ghidra", "pyghidra-mcp", "ghidra-n64"]
+optional = ["sdl3", "objdiff", "emu-n64"]
+
+[routes.n64-recomp]
+label = "N64 static recompilation: N64Recomp"
+required = ["git", "cmake", "cxx", "python", "uv", "n64recomp", "splat"]
+optional = ["jdk", "ghidra", "ghidra-n64", "sdl3", "emu-n64"]
+
+[routes.gba]
+label = "GBA: Ghidra (ARMv4T) -> C++ over a platform layer"
+required = ["git", "cmake", "cxx", "python", "uv", "jdk", "ghidra", "pyghidra-mcp"]
+optional = ["ghidra-gba", "sdl3", "emu-gba"]
+
+[routes.nds]
+label = "NDS: Ghidra + NTRGhidra"
+required = ["git", "cmake", "cxx", "python", "uv", "jdk", "ghidra", "pyghidra-mcp", "ghidra-nds"]
+optional = ["sdl3", "emu-nds"]
+
+[routes.ps1]
+label = "PS1: splat + Ghidra (psx loader)"
+required = ["git", "cmake", "cxx", "python", "uv", "splat", "jdk", "ghidra", "pyghidra-mcp", "ghidra-psx"]
+optional = ["sdl3", "objdiff", "emu-ps1"]
+
+[routes.ps2]
+label = "PS2: splat + Ghidra (Emotion Engine)"
+required = ["git", "cmake", "cxx", "python", "uv", "splat", "jdk", "ghidra", "pyghidra-mcp", "ghidra-ee"]
+optional = ["sdl3", "objdiff", "emu-ps2"]
+
+[routes.ps2-recomp]
+label = "PS2 static recompilation: PS2Recomp (experimental)"
+required = ["git", "cmake", "cxx", "python", "uv", "ps2recomp"]
+optional = ["jdk", "ghidra", "ghidra-ee", "sdl3", "emu-ps2"]
+
+[routes.psp]
+label = "PSP: Ghidra (Allegrex) + splat"
+required = ["git", "cmake", "cxx", "python", "uv", "jdk", "ghidra", "pyghidra-mcp", "ghidra-allegrex"]
+optional = ["splat", "sdl3", "emu-psp"]
+
+[routes.gamecube-wii]
+label = "GameCube/Wii: decomp-toolkit + Ghidra"
+required = ["git", "cmake", "cxx", "python", "uv", "decomp-toolkit", "jdk", "ghidra", "pyghidra-mcp", "ghidra-gamecube"]
+optional = ["objdiff", "sdl3", "emu-gc"]
+
+[routes.xbox]
+label = "Original Xbox: Ghidra + ghidra-xbe"
+required = ["git", "cmake", "cxx", "python", "uv", "jdk", "ghidra", "pyghidra-mcp", "ghidra-xbe"]
+optional = ["extract-xiso", "sdl3", "emu-xbox"]
+
+[routes.xbox360]
+label = "Xbox 360 clean-room: Ghidra + XEXLoaderWV"
+required = ["git", "cmake", "cxx", "python", "uv", "jdk", "ghidra", "pyghidra-mcp", "ghidra-xex"]
+optional = ["extract-xiso", "sdl3", "emu-xbox360"]
+
+[routes.xbox360-recomp]
+label = "Xbox 360 static recompilation: XenonRecomp"
+required = ["git", "cmake", "cxx", "python", "uv", "xenonrecomp"]
+optional = ["jdk", "ghidra", "ghidra-xex", "sdl3", "emu-xbox360"]
+
+[routes.ps3]
+label = "PS3: Ghidra (PowerPC64 BE, decrypted ELF)"
+required = ["git", "cmake", "cxx", "python", "uv", "jdk", "ghidra", "pyghidra-mcp"]
+optional = ["sdl3", "emu-ps3"]
+
+[routes.switch]
+label = "Switch: Ghidra + Ghidra-Switch-Loader (decrypted NSO)"
+required = ["git", "cmake", "cxx", "python", "uv", "jdk", "ghidra", "pyghidra-mcp", "ghidra-switch"]
+optional = ["sdl3"]

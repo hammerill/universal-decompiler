@@ -1,0 +1,30 @@
+# universal-decompiler settings for this decomp repo (read by ud; written by `ud init`).
+
+[project]
+name = "tinyquest"
+route = "native"
+data_dir = "data"
+
+[build]
+source_dir = "."
+build_dir = "build"
+config = "Release"
+generator = ""
+options = []
+
+[run]
+exe = "build/bin/tinyquest"   # ".exe" is added on Windows
+args = []
+cwd = "."
+original = "data/tinyquest"   # the user's copy: the original binary + tinyquest.pak in data/
+original_args = []
+original_cwd = "."            # the original looks for data/tinyquest.pak from here
+logs = []
+
+[assets]
+script = "tools/extract_assets.py"
+
+[publish]
+allow = []
+asset_dirs = []
+unverifiable = "warn"
