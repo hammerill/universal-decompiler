@@ -12,8 +12,9 @@
 #   version          arguments that print the version (stdout or stderr), version_regex picks it out
 #   version_file     a file (relative to the found folder) holding the version; version_regex picks it out
 #   min_version      dotted minimum, compared numerically
-#   platforms        where it runs at all (default: windows, linux)
-#   install.windows / install.linux   exact steps shown to the user; ud never runs them
+#   platforms        where it runs at all (default: windows, linux, macos)
+#   install.windows / install.linux / install.macos   exact steps shown to the user, one per platform it runs
+#                    on; ud never runs them
 #
 # [routes.<id>]  label, required = [...], optional = [...]
 # Every route lists its base tools explicitly so a route reads on its own.
@@ -31,6 +32,7 @@ version = ["--version"]
 version_regex = 'git version ([0-9.]+)'
 install.windows = "winget install --id Git.Git -e"
 install.linux = "sudo apt install git   # Fedora: sudo dnf install git   Arch: sudo pacman -S git"
+install.macos = "xcode-select --install   # Apple's git comes with the Command Line Tools; or: brew install git"
 
 [tools.cmake]
 name = "CMake"
@@ -42,9 +44,10 @@ version_regex = 'cmake version ([0-9.]+)'
 min_version = "3.20"
 install.windows = "winget install --id Kitware.CMake -e   # or the 'C++ CMake tools' component of Visual Studio"
 install.linux = "sudo apt install cmake   # older distros: pip install cmake  or  https://cmake.org/download/"
+install.macos = "brew install cmake   # or the .dmg from https://cmake.org/download/ (then add CMake.app/Contents/bin to PATH)"
 
 [tools.cxx]
-name = "C++ compiler (MSVC on Windows, GCC or Clang on Linux)"
+name = "C++ compiler (MSVC on Windows, GCC or Clang on Linux, Apple Clang on macOS)"
 description = "compiles the C++17 reconstruction"
 homepage = "https://visualstudio.microsoft.com/downloads/"
 bin = ["cl", "g++", "clang++", "c++"]
@@ -55,6 +58,7 @@ install.windows = """Install Visual Studio 2022 (Community is fine) or the Build
   winget install --id Microsoft.VisualStudio.2022.BuildTools -e --override "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --passive"
 CMake finds MSVC by itself; `cl` is only on PATH inside a "Developer PowerShell"."""
 install.linux = "sudo apt install build-essential   # or: sudo apt install clang   Fedora: sudo dnf install gcc-c++"
+install.macos = "xcode-select --install   # Apple Clang from the Xcode Command Line Tools (full Xcode works too)"
 
 [tools.ninja]
 name = "Ninja"
@@ -65,6 +69,7 @@ version = ["--version"]
 version_regex = '([0-9.]+)'
 install.windows = "winget install --id Ninja-build.Ninja -e"
 install.linux = "sudo apt install ninja-build"
+install.macos = "brew install ninja"
 
 [tools.python]
 name = "Python 3.12+"
@@ -76,6 +81,7 @@ version_regex = 'Python ([0-9.]+)'
 min_version = "3.12"
 install.windows = "winget install --id Python.Python.3.12 -e   # or let uv manage it: uv python install 3.12"
 install.linux = "sudo apt install python3   # or: uv python install 3.12"
+install.macos = "brew install python@3.12   # or: uv python install 3.12"
 
 [tools.uv]
 name = "uv"
@@ -86,6 +92,7 @@ version = ["--version"]
 version_regex = 'uv ([0-9.]+)'
 install.windows = "powershell -ExecutionPolicy ByPass -c \"irm https://astral.sh/uv/install.ps1 | iex\"   # or: winget install --id astral-sh.uv -e"
 install.linux = "curl -LsSf https://astral.sh/uv/install.sh | sh"
+install.macos = "curl -LsSf https://astral.sh/uv/install.sh | sh   # or: brew install uv"
 
 [tools.sdl3]
 name = "SDL3 development files"
@@ -102,6 +109,7 @@ https://wiki.libsdl.org/SDL3/README-linux#build-dependencies), e.g. on Ubuntu 24
     libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libegl1-mesa-dev libwayland-dev libdecor-0-dev \
     libasound2-dev libpulse-dev libpipewire-0.3-dev libdbus-1-dev libibus-1.0-dev libudev-dev
 Headless only (CI, oracle runs): build with -D UD_SDL_MINIMAL=ON and none of these are needed."""
+install.macos = "brew install sdl3   # or let CMake's FetchContent build it: on macOS that needs only the Xcode Command Line Tools"
 
 [tools.screenshot-x11]
 name = "xdotool + ImageMagick (window screenshots on X11)"
@@ -125,6 +133,7 @@ version_regex = 'version "([0-9]+(\.[0-9]+)*)'
 min_version = "21"
 install.windows = "winget install --id EclipseAdoptium.Temurin.21.JDK -e"
 install.linux = "sudo apt install openjdk-21-jdk   # Fedora: sudo dnf install java-21-openjdk-devel"
+install.macos = "brew install --cask temurin@21"
 
 [tools.ghidra]
 name = "Ghidra 12.1+"
@@ -142,6 +151,11 @@ install.windows = """1. Download ghidra_12.1.4_PUBLIC_<date>.zip from https://gi
 install.linux = """1. Download ghidra_12.1.4_PUBLIC_<date>.zip from https://github.com/NationalSecurityAgency/ghidra/releases/latest
 2. unzip it, e.g. to ~/tools/ghidra_12.1.4_PUBLIC
 3. echo 'export GHIDRA_INSTALL_DIR="$HOME/tools/ghidra_12.1.4_PUBLIC"' >> ~/.bashrc   (then open a new terminal)"""
+install.macos = """1. Download ghidra_12.1.4_PUBLIC_<date>.zip from https://github.com/NationalSecurityAgency/ghidra/releases/latest
+2. unzip it, e.g. to ~/tools/ghidra_12.1.4_PUBLIC   (or: brew install ghidra, then use the folder under
+   $(brew --prefix ghidra) that holds ghidraRun)
+3. echo 'export GHIDRA_INSTALL_DIR="$HOME/tools/ghidra_12.1.4_PUBLIC"' >> ~/.zshrc   (then open a new terminal)
+If macOS blocks Ghidra's native decompiler on first use, allow it in System Settings > Privacy & Security."""
 
 [tools.pyghidra-mcp]
 name = "pyghidra-mcp"
@@ -152,6 +166,7 @@ version = ["--version"]
 version_regex = '([0-9]+\.[0-9]+\.[0-9]+)'
 install.windows = "uv tool install pyghidra-mcp   # needs GHIDRA_INSTALL_DIR and the JDK"
 install.linux = "uv tool install pyghidra-mcp   # needs GHIDRA_INSTALL_DIR and the JDK"
+install.macos = "uv tool install pyghidra-mcp   # needs GHIDRA_INSTALL_DIR and the JDK"
 
 [tools.x64dbg]
 name = "x64dbg"
@@ -164,14 +179,15 @@ platforms = ["windows"]
 install.windows = "Download the latest snapshot from https://github.com/x64dbg/x64dbg/releases, extract it, and set X64DBG_DIR to the extracted folder"
 
 [tools.gdb]
-name = "GDB"
-description = "debugger for the rebuilt program on Linux"
+name = "GDB or LLDB"
+description = "debugger for the rebuilt program on Linux and macOS"
 homepage = "https://www.sourceware.org/gdb/"
 bin = ["gdb", "lldb"]
 version = ["--version"]
 version_regex = '([0-9]+\.[0-9]+)'
-platforms = ["linux"]
+platforms = ["linux", "macos"]
 install.linux = "sudo apt install gdb"
+install.macos = "xcode-select --install   # LLDB comes with the Command Line Tools (GDB doesn't run on Apple silicon)"
 
 [tools.7zip]
 name = "7-Zip"
@@ -181,6 +197,7 @@ bin = ["7z", "7zz", "7za"]
 paths = ["%ProgramFiles%/7-Zip/7z.exe"]
 install.windows = "winget install --id 7zip.7zip -e"
 install.linux = "sudo apt install 7zip   # older distros: p7zip-full"
+install.macos = "brew install sevenzip   # provides 7zz"
 
 # ----------------------------------------------------------------------------- managed
 
@@ -194,6 +211,7 @@ version_regex = '([0-9]+\.[0-9]+\.[0-9]+)'
 min_version = "8.0"
 install.windows = "winget install --id Microsoft.DotNet.SDK.10 -e"
 install.linux = "sudo apt install dotnet-sdk-10.0   # or: https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual"
+install.macos = "brew install --cask dotnet-sdk   # or the installer from https://dotnet.microsoft.com/download"
 
 [tools.ilspycmd]
 name = "ilspycmd"
@@ -204,6 +222,7 @@ version = ["--version"]
 version_regex = '([0-9]+\.[0-9]+\.[0-9]+)'
 install.windows = "dotnet tool install --global ilspycmd"
 install.linux = "dotnet tool install --global ilspycmd   # then make sure ~/.dotnet/tools is on PATH"
+install.macos = "dotnet tool install --global ilspycmd   # then make sure ~/.dotnet/tools is on PATH"
 
 [tools.assetripper]
 name = "AssetRipper"
@@ -213,7 +232,8 @@ bin = ["AssetRipper.GUI.Free", "AssetRipper"]
 env = "ASSETRIPPER_DIR"
 env_files = ["AssetRipper.GUI.Free.exe", "AssetRipper.GUI.Free"]
 install.windows = "Download AssetRipper_win_x64.zip from https://github.com/AssetRipper/AssetRipper/releases/latest, extract it, and setx ASSETRIPPER_DIR \"<extracted folder>\""
-install.linux = "Download AssetRipper_linux_x64.zip from https://github.com/AssetRipper/AssetRipper/releases/latest, unzip it, chmod +x AssetRipper.GUI.Free, and export ASSETRIPPER_DIR=<folder>"
+install.linux = "Download AssetRipper_linux_x64.tar.xz from https://github.com/AssetRipper/AssetRipper/releases/latest, extract it, chmod +x AssetRipper.GUI.Free, and export ASSETRIPPER_DIR=<folder>"
+install.macos = "Download AssetRipper_mac_arm64.tar.xz (Intel: AssetRipper_mac_x64.tar.xz) from https://github.com/AssetRipper/AssetRipper/releases/latest, extract it, chmod +x AssetRipper.GUI.Free, and export ASSETRIPPER_DIR=<folder>"
 
 [tools.cpp2il]
 name = "Cpp2IL"
@@ -224,6 +244,7 @@ env = "CPP2IL"
 env_files = ["Cpp2IL.exe", "Cpp2IL", "Cpp2IL-Win.exe", "Cpp2IL-Linux"]
 install.windows = "Download Cpp2IL-net9-win-x64.zip (the development build linked from https://github.com/SamboyCoding/Cpp2IL#readme; the last tagged release is from 2022), extract it, and setx CPP2IL \"<folder>\""
 install.linux = "Download Cpp2IL-net9-linux-x64.zip (development build linked from https://github.com/SamboyCoding/Cpp2IL#readme), unzip, chmod +x Cpp2IL, export CPP2IL=<folder>"
+install.macos = "Download the macOS build of Cpp2IL (development build linked from https://github.com/SamboyCoding/Cpp2IL#readme), unzip, chmod +x Cpp2IL, export CPP2IL=<folder>"
 
 [tools.il2cppdumper]
 name = "Il2CppDumper (unmaintained, fallback only)"
@@ -234,6 +255,7 @@ env = "IL2CPPDUMPER_DIR"
 env_files = ["Il2CppDumper.exe", "Il2CppDumper"]
 install.windows = "Download the latest release zip from https://github.com/Perfare/Il2CppDumper/releases and setx IL2CPPDUMPER_DIR \"<folder>\""
 install.linux = "Download the net6 release zip from https://github.com/Perfare/Il2CppDumper/releases and run it with `dotnet Il2CppDumper.dll`"
+install.macos = "Download the net6 release zip from https://github.com/Perfare/Il2CppDumper/releases and run it with `dotnet Il2CppDumper.dll`"
 
 [tools.unity-editor]
 name = "Unity Editor (the game's exact version)"
@@ -244,6 +266,7 @@ env = "UNITY_EDITOR"
 env_files = ["Unity.exe", "Unity", "Editor/Unity.exe", "Editor/Unity"]
 install.windows = "winget install --id Unity.UnityHub -e, then in Unity Hub > Installs > Install Editor > Archive pick the version `ud scan` reported (set UNITY_EDITOR to its folder)"
 install.linux = "Install Unity Hub (https://docs.unity3d.com/hub/manual/InstallHub.html#install-hub-linux), then install the editor version `ud scan` reported and set UNITY_EDITOR to its folder"
+install.macos = "brew install --cask unity-hub, then in Unity Hub install the editor version `ud scan` reported and set UNITY_EDITOR to its folder"
 
 [tools.fmodel]
 name = "FModel"
@@ -272,6 +295,7 @@ env = "UE_ROOT"
 env_files = ["Engine/Binaries/Win64/UnrealEditor.exe", "Engine/Binaries/Linux/UnrealEditor", "Engine/Binaries/Win64/UE4Editor.exe"]
 install.windows = "Epic Games Launcher > Unreal Engine > Library > + > pick the engine version `ud scan` reported; setx UE_ROOT \"<engine folder>\""
 install.linux = "Download the Linux build from https://www.unrealengine.com/linux (or build from source with Epic's GitHub access) and export UE_ROOT=<engine folder>"
+install.macos = "brew install --cask epic-games, then Epic Games Launcher > Unreal Engine > Library > + > the engine version `ud scan` reported; export UE_ROOT=<engine folder>"
 
 [tools.gdre-tools]
 name = "GDRE Tools"
@@ -282,6 +306,7 @@ env = "GDRE_TOOLS"
 env_files = ["gdre_tools.exe", "gdre_tools.x86_64", "gdre_tools"]
 install.windows = "scoop bucket add games; scoop install gdsdecomp   # or download the Windows zip from https://github.com/GDRETools/gdsdecomp/releases/latest and setx GDRE_TOOLS \"<folder>\""
 install.linux = "Download the Linux zip from https://github.com/GDRETools/gdsdecomp/releases/latest, unzip, chmod +x gdre_tools.x86_64, export GDRE_TOOLS=<folder>"
+install.macos = "Download GDRE_tools-<version>-macos.zip from https://github.com/GDRETools/gdsdecomp/releases/latest, unzip, and export GDRE_TOOLS=<folder>"
 
 [tools.godot]
 name = "Godot (the game's exact version)"
@@ -294,6 +319,7 @@ version = ["--version"]
 version_regex = '([0-9]+\.[0-9]+(\.[0-9]+)?)'
 install.windows = "Download the version `ud scan` reported from https://godotengine.org/download/archive/ (Mono build if the game uses C#) and put it on PATH as godot.exe"
 install.linux = "Download the version `ud scan` reported from https://godotengine.org/download/archive/, chmod +x, and put it on PATH as godot"
+install.macos = "brew install --cask godot   # for an older version: download it from https://godotengine.org/download/archive/ and put it on PATH as godot"
 
 [tools.undertalemodtool]
 name = "UndertaleModTool / UndertaleModCli"
@@ -304,6 +330,7 @@ env = "UTMT_DIR"
 env_files = ["UndertaleModCli.exe", "UndertaleModCli", "UndertaleModTool.exe"]
 install.windows = "Download the release zip (0.9.2.0 or newer) from https://github.com/UnderminersTeam/UndertaleModTool/releases/latest and setx UTMT_DIR \"<folder>\""
 install.linux = "Download the UndertaleModCli Linux zip from https://github.com/UnderminersTeam/UndertaleModTool/releases/latest and export UTMT_DIR=<folder>"
+install.macos = "Download UTMT_CLI_<version>-macOS.zip from https://github.com/UnderminersTeam/UndertaleModTool/releases/latest and export UTMT_DIR=<folder>"
 
 [tools.gamemaker-ide]
 name = "GameMaker IDE"
@@ -313,6 +340,7 @@ env = "GAMEMAKER_DIR"
 env_files = ["GameMaker.exe", "GameMaker"]
 install.windows = "Download from https://gamemaker.io/download and setx GAMEMAKER_DIR \"<install folder>\""
 install.linux = "Download the Ubuntu beta from https://gamemaker.io/download and export GAMEMAKER_DIR=<install folder>"
+install.macos = "Download the macOS installer from https://gamemaker.io/download and export GAMEMAKER_DIR=<install folder>"
 
 # ----------------------------------------------------------------------------- script engines
 
@@ -325,6 +353,7 @@ version = ["--version"]
 version_regex = 'v([0-9.]+)'
 install.windows = "winget install --id OpenJS.NodeJS.LTS -e"
 install.linux = "sudo apt install nodejs npm   # or https://nodejs.org/en/download"
+install.macos = "brew install node   # or https://nodejs.org/en/download"
 
 [tools.asar]
 name = "@electron/asar"
@@ -335,6 +364,7 @@ version = ["--version"]
 version_regex = '([0-9.]+)'
 install.windows = "npm install -g @electron/asar"
 install.linux = "npm install -g @electron/asar"
+install.macos = "npm install -g @electron/asar"
 
 [tools.unrpyc]
 name = "unrpyc"
@@ -344,6 +374,7 @@ env = "UNRPYC_DIR"
 env_files = ["unrpyc.py"]
 install.windows = "git clone https://github.com/CensoredUsername/unrpyc C:\\Tools\\unrpyc  (check out the tag matching the game's Ren'Py major version: v2.x for Ren'Py 8, v1.x for 7) and setx UNRPYC_DIR C:\\Tools\\unrpyc"
 install.linux = "git clone https://github.com/CensoredUsername/unrpyc ~/tools/unrpyc  (v2.x for Ren'Py 8, v1.x for 7) and export UNRPYC_DIR=~/tools/unrpyc"
+install.macos = "git clone https://github.com/CensoredUsername/unrpyc ~/tools/unrpyc  (v2.x for Ren'Py 8, v1.x for 7) and export UNRPYC_DIR=~/tools/unrpyc"
 
 [tools.rpatool]
 name = "rpatool"
@@ -354,6 +385,7 @@ env = "RPATOOL"
 env_files = ["rpatool"]
 install.windows = "git clone https://github.com/Shizmob/rpatool C:\\Tools\\rpatool and setx RPATOOL C:\\Tools\\rpatool  (run: python rpatool -x archive.rpa)"
 install.linux = "git clone https://github.com/Shizmob/rpatool ~/tools/rpatool && export RPATOOL=~/tools/rpatool"
+install.macos = "git clone https://github.com/Shizmob/rpatool ~/tools/rpatool && export RPATOOL=~/tools/rpatool"
 
 [tools.rpgmakerdecrypter]
 name = "RPGMakerDecrypter"
@@ -364,6 +396,7 @@ env = "RPGMAKERDECRYPTER_DIR"
 env_files = ["RPGMakerDecrypter-cli.exe", "RPGMakerDecrypter-cli"]
 install.windows = "Download the CLI zip from https://github.com/uuksu/RPGMakerDecrypter/releases/latest and setx RPGMAKERDECRYPTER_DIR \"<folder>\""
 install.linux = "Download the Linux CLI from https://github.com/uuksu/RPGMakerDecrypter/releases/latest and export RPGMAKERDECRYPTER_DIR=<folder>"
+install.macos = "No macOS release: build the CLI from https://github.com/uuksu/RPGMakerDecrypter with the .NET SDK (dotnet publish, see its README) and export RPGMAKERDECRYPTER_DIR=<publish folder>"
 
 [tools.jpexs]
 name = "JPEXS Free Flash Decompiler"
@@ -374,6 +407,7 @@ env = "JPEXS_DIR"
 env_files = ["ffdec.bat", "ffdec.sh", "ffdec.jar"]
 install.windows = "Download the zip (version 26.3.0 or newer) from https://github.com/jindrapetrik/jpexs-decompiler/releases/latest, extract, setx JPEXS_DIR \"<folder>\" (needs Java 8+)"
 install.linux = "Download the zip from https://github.com/jindrapetrik/jpexs-decompiler/releases/latest, unzip, export JPEXS_DIR=<folder> (needs Java 8+)"
+install.macos = "Download ffdec_<version>_macosx.zip from https://github.com/jindrapetrik/jpexs-decompiler/releases/latest, unzip, export JPEXS_DIR=<folder> (needs Java 8+)"
 
 # ----------------------------------------------------------------------------- Java, Python
 
@@ -386,6 +420,7 @@ env = "VINEFLOWER_JAR"
 env_files = ["."]
 install.windows = "Download vineflower-1.12.0.jar from https://github.com/Vineflower/vineflower/releases/latest and setx VINEFLOWER_JAR \"C:\\Tools\\vineflower-1.12.0.jar\"  (run: java -jar %VINEFLOWER_JAR% in.jar out/)"
 install.linux = "Download vineflower-1.12.0.jar from https://github.com/Vineflower/vineflower/releases/latest and export VINEFLOWER_JAR=~/tools/vineflower-1.12.0.jar"
+install.macos = "Download vineflower-1.12.0.jar from https://github.com/Vineflower/vineflower/releases/latest and export VINEFLOWER_JAR=~/tools/vineflower-1.12.0.jar"
 
 [tools.jdk-any]
 name = "JDK (the game's Java version or newer)"
@@ -396,6 +431,7 @@ version = ["-version"]
 version_regex = 'version "([0-9]+(\.[0-9]+)*)'
 install.windows = "winget install --id EclipseAdoptium.Temurin.21.JDK -e   (pick the major version the game targets)"
 install.linux = "sudo apt install openjdk-21-jdk   (pick the major version the game targets)"
+install.macos = "brew install --cask temurin@21   (pick the major version the game targets)"
 
 [tools.gradle]
 name = "Gradle"
@@ -406,6 +442,7 @@ version = ["--version"]
 version_regex = '(?:Gradle|Apache Maven) ([0-9.]+)'
 install.windows = "winget install --id Gradle.Gradle -e   # or Maven: winget install --id Apache.Maven -e"
 install.linux = "sdk install gradle   # (SDKMAN) or: sudo apt install maven"
+install.macos = "brew install gradle   # or: brew install maven"
 
 [tools.pyinstxtractor]
 name = "pyinstxtractor"
@@ -416,6 +453,7 @@ env = "PYINSTXTRACTOR"
 env_files = ["pyinstxtractor.py"]
 install.windows = "uv tool install pyinstxtractor-ng   # or download pyinstxtractor.py from https://github.com/extremecoders-re/pyinstxtractor and setx PYINSTXTRACTOR \"<folder>\""
 install.linux = "uv tool install pyinstxtractor-ng   # or download pyinstxtractor.py and export PYINSTXTRACTOR=<folder>"
+install.macos = "uv tool install pyinstxtractor-ng   # or download pyinstxtractor.py and export PYINSTXTRACTOR=<folder>"
 
 [tools.pylingual]
 name = "PyLingual"
@@ -424,6 +462,7 @@ homepage = "https://github.com/syssec-utd/pylingual"
 bin = ["pylingual"]
 install.windows = "git clone https://github.com/syssec-utd/pylingual C:\\Tools\\pylingual; uv tool install C:\\Tools\\pylingual"
 install.linux = "git clone https://github.com/syssec-utd/pylingual ~/tools/pylingual && uv tool install ~/tools/pylingual"
+install.macos = "git clone https://github.com/syssec-utd/pylingual ~/tools/pylingual && uv tool install ~/tools/pylingual"
 
 [tools.pycdc]
 name = "pycdc (Decompyle++)"
@@ -432,6 +471,7 @@ homepage = "https://github.com/zrax/pycdc"
 bin = ["pycdc"]
 install.windows = "git clone https://github.com/zrax/pycdc; cmake -S pycdc -B pycdc/build; cmake --build pycdc/build --config Release; add pycdc\\build\\Release to PATH"
 install.linux = "git clone https://github.com/zrax/pycdc && cmake -S pycdc -B pycdc/build && cmake --build pycdc/build && sudo cp pycdc/build/pycdc /usr/local/bin/"
+install.macos = "git clone https://github.com/zrax/pycdc && cmake -S pycdc -B pycdc/build && cmake --build pycdc/build && sudo cp pycdc/build/pycdc /usr/local/bin/"
 
 # ----------------------------------------------------------------------------- consoles
 
@@ -443,6 +483,7 @@ python_module = "splat"
 bin = ["splat"]
 install.windows = "uv tool install \"splat64[mips]\"   # or: python -m pip install -U \"splat64[mips]\""
 install.linux = "uv tool install 'splat64[mips]'   # or: python3 -m pip install -U 'splat64[mips]'"
+install.macos = "uv tool install 'splat64[mips]'   # or: python3 -m pip install -U 'splat64[mips]'"
 
 [tools.n64recomp]
 name = "N64Recomp"
@@ -451,6 +492,7 @@ homepage = "https://github.com/N64Recomp/N64Recomp"
 bin = ["N64Recomp"]
 install.windows = "git clone --recursive https://github.com/N64Recomp/N64Recomp; cmake -S N64Recomp -B N64Recomp/build; cmake --build N64Recomp/build --config Release; add the build folder to PATH"
 install.linux = "git clone --recursive https://github.com/N64Recomp/N64Recomp && cmake -S N64Recomp -B N64Recomp/build && cmake --build N64Recomp/build -j && add N64Recomp/build to PATH"
+install.macos = "git clone --recursive https://github.com/N64Recomp/N64Recomp && cmake -S N64Recomp -B N64Recomp/build && cmake --build N64Recomp/build -j && add N64Recomp/build to PATH"
 
 [tools.ghidra-n64]
 name = "N64LoaderWV (Ghidra extension)"
@@ -459,6 +501,7 @@ homepage = "https://github.com/zeroKilo/N64LoaderWV"
 ghidra_extension = "N64LoaderWV"
 install.windows = "Download the release zip matching your Ghidra version from https://github.com/zeroKilo/N64LoaderWV/releases, then Ghidra > File > Install Extensions > + (the zip) and restart Ghidra"
 install.linux = "Same: release zip for your Ghidra version, Ghidra > File > Install Extensions"
+install.macos = "Same: release zip for your Ghidra version, Ghidra > File > Install Extensions"
 
 [tools.ghidra-gba]
 name = "GhidraGBA (Ghidra extension, optional)"
@@ -467,6 +510,7 @@ homepage = "https://github.com/SiD3W4y/GhidraGBA"
 ghidra_extension = "GhidraGBA"
 install.windows = "Build/install from https://github.com/SiD3W4y/GhidraGBA if it supports your Ghidra; otherwise import the ROM as Raw Binary, language ARM:LE:32:v4t, base 0x08000000"
 install.linux = "Same as Windows"
+install.macos = "Same as Windows"
 
 [tools.ghidra-nds]
 name = "NTRGhidra (Ghidra extension)"
@@ -475,6 +519,7 @@ homepage = "https://github.com/pedro-javierf/NTRGhidra"
 ghidra_extension = "NTRGhidra"
 install.windows = "Download the release for your Ghidra version from https://github.com/pedro-javierf/NTRGhidra/releases and install it with Ghidra > File > Install Extensions"
 install.linux = "Same as Windows"
+install.macos = "Same as Windows"
 
 [tools.ghidra-psx]
 name = "ghidra_psx_ldr (Ghidra extension)"
@@ -483,6 +528,7 @@ homepage = "https://github.com/lab313ru/ghidra_psx_ldr"
 ghidra_extension = "ghidra_psx_ldr"
 install.windows = "Download the release for your Ghidra version from https://github.com/lab313ru/ghidra_psx_ldr/releases and install it with Ghidra > File > Install Extensions"
 install.linux = "Same as Windows"
+install.macos = "Same as Windows"
 
 [tools.ghidra-ee]
 name = "ghidra-emotionengine-reloaded (Ghidra extension)"
@@ -491,6 +537,7 @@ homepage = "https://github.com/chaoticgd/ghidra-emotionengine-reloaded"
 ghidra_extension = "ghidra-emotionengine-reloaded"
 install.windows = "Download the release for your Ghidra version from https://github.com/chaoticgd/ghidra-emotionengine-reloaded/releases and install it with Ghidra > File > Install Extensions"
 install.linux = "Same as Windows"
+install.macos = "Same as Windows"
 
 [tools.ghidra-allegrex]
 name = "ghidra-allegrex (Ghidra extension)"
@@ -499,6 +546,7 @@ homepage = "https://github.com/kotcrab/ghidra-allegrex"
 ghidra_extension = "ghidra-allegrex"
 install.windows = "Download the release for your Ghidra version from https://github.com/kotcrab/ghidra-allegrex/releases and install it with Ghidra > File > Install Extensions"
 install.linux = "Same as Windows"
+install.macos = "Same as Windows"
 
 [tools.decomp-toolkit]
 name = "decomp-toolkit (dtk)"
@@ -509,6 +557,7 @@ version = ["--version"]
 version_regex = '([0-9]+\.[0-9]+\.[0-9]+)'
 install.windows = "Download dtk-windows-x86_64.exe (1.8.4 or newer) from https://github.com/encounter/decomp-toolkit/releases/latest, rename to dtk.exe, put it on PATH"
 install.linux = "Download dtk-linux-x86_64 from https://github.com/encounter/decomp-toolkit/releases/latest, chmod +x, rename to dtk, put it on PATH"
+install.macos = "Download dtk-macos-arm64 (Intel: dtk-macos-x86_64) from https://github.com/encounter/decomp-toolkit/releases/latest, chmod +x, rename to dtk, put it on PATH"
 
 [tools.ghidra-gamecube]
 name = "Ghidra-GameCube-Loader (Ghidra extension)"
@@ -517,6 +566,7 @@ homepage = "https://github.com/Cuyler36/Ghidra-GameCube-Loader"
 ghidra_extension = "Ghidra-GameCube-Loader"
 install.windows = "Download the release for your Ghidra version from https://github.com/Cuyler36/Ghidra-GameCube-Loader/releases and install it with Ghidra > File > Install Extensions"
 install.linux = "Same as Windows"
+install.macos = "Same as Windows"
 
 [tools.objdiff]
 name = "objdiff"
@@ -525,6 +575,7 @@ homepage = "https://github.com/encounter/objdiff/releases"
 bin = ["objdiff", "objdiff-cli"]
 install.windows = "Download objdiff-windows-x86_64.exe from https://github.com/encounter/objdiff/releases/latest and put it on PATH"
 install.linux = "Download objdiff-linux-x86_64 from https://github.com/encounter/objdiff/releases/latest, chmod +x, put it on PATH"
+install.macos = "Download objdiff-macos-arm64 (Intel: objdiff-macos-x86_64) from https://github.com/encounter/objdiff/releases/latest, chmod +x, put it on PATH"
 
 [tools.ghidra-xbe]
 name = "ghidra-xbe (Ghidra extension)"
@@ -533,6 +584,7 @@ homepage = "https://github.com/XboxDev/ghidra-xbe"
 ghidra_extension = "ghidra-xbe"
 install.windows = "Download the release for your Ghidra version from https://github.com/XboxDev/ghidra-xbe/releases and install it with Ghidra > File > Install Extensions"
 install.linux = "Same as Windows"
+install.macos = "Same as Windows"
 
 [tools.extract-xiso]
 name = "extract-xiso"
@@ -541,6 +593,7 @@ homepage = "https://github.com/XboxDev/extract-xiso/releases"
 bin = ["extract-xiso"]
 install.windows = "Download the Windows build from https://github.com/XboxDev/extract-xiso/releases/latest and put extract-xiso.exe on PATH"
 install.linux = "Download the Linux build from https://github.com/XboxDev/extract-xiso/releases/latest (or build with CMake) and put it on PATH"
+install.macos = "Download extract-xiso_macOS.zip from https://github.com/XboxDev/extract-xiso/releases/latest (or build with CMake) and put it on PATH"
 
 [tools.ghidra-xex]
 name = "XEXLoaderWV (Ghidra extension)"
@@ -549,6 +602,7 @@ homepage = "https://github.com/zeroKilo/XEXLoaderWV"
 ghidra_extension = "XEXLoaderWV"
 install.windows = "Download the release matching your Ghidra version (e.g. 12.1.3 for Ghidra 12.1.x) from https://github.com/zeroKilo/XEXLoaderWV/releases and install it with Ghidra > File > Install Extensions"
 install.linux = "Same as Windows"
+install.macos = "Same as Windows"
 
 [tools.xenonrecomp]
 name = "XenonRecomp (+ XenonAnalyse)"
@@ -557,6 +611,7 @@ homepage = "https://github.com/hedge-dev/XenonRecomp"
 bin = ["XenonRecomp", "XenonAnalyse"]
 install.windows = "git clone --recursive https://github.com/hedge-dev/XenonRecomp; build with CMake + clang-cl per its README; put XenonRecomp and XenonAnalyse on PATH"
 install.linux = "git clone --recursive https://github.com/hedge-dev/XenonRecomp && build with CMake + Clang per its README; put XenonRecomp and XenonAnalyse on PATH"
+install.macos = "git clone --recursive https://github.com/hedge-dev/XenonRecomp && build with CMake + Clang per its README; put XenonRecomp and XenonAnalyse on PATH"
 
 [tools.ps2recomp]
 name = "PS2Recomp (experimental)"
@@ -565,6 +620,7 @@ homepage = "https://github.com/ran-j/PS2Recomp"
 bin = ["ps2recomp", "PS2Recomp"]
 install.windows = "git clone --recursive https://github.com/ran-j/PS2Recomp and build per its README; put the binary on PATH"
 install.linux = "git clone --recursive https://github.com/ran-j/PS2Recomp and build per its README; put the binary on PATH"
+install.macos = "git clone --recursive https://github.com/ran-j/PS2Recomp and build per its README; put the binary on PATH"
 
 [tools.ghidra-switch]
 name = "Ghidra-Switch-Loader (Ghidra extension)"
@@ -575,6 +631,7 @@ install.windows = "Download the release for your Ghidra version from https://git
 install.linux = "Same as Windows"
 
 # Emulators: the oracle for console routes (the original's behaviour is the reference).
+install.macos = "Same as Windows"
 [tools.emu-n64]
 name = "ares or simple64 (N64 emulator)"
 description = "runs the original as the oracle"
@@ -582,6 +639,7 @@ homepage = "https://ares-emu.net"
 bin = ["ares", "simple64-gui"]
 install.windows = "winget install --id ares-emulator.ares -e   # or download from https://ares-emu.net"
 install.linux = "flatpak install flathub dev.ares.ares"
+install.macos = "Download the macOS build from https://ares-emu.net"
 
 [tools.emu-gba]
 name = "mGBA"
@@ -590,6 +648,7 @@ homepage = "https://mgba.io/downloads.html"
 bin = ["mgba", "mgba-qt", "mGBA"]
 install.windows = "winget install --id JeffreyPfau.mGBA -e"
 install.linux = "sudo apt install mgba-qt   # or flatpak install flathub io.mgba.mGBA"
+install.macos = "brew install --cask mgba-app"
 
 [tools.emu-nds]
 name = "melonDS"
@@ -598,6 +657,7 @@ homepage = "https://melonds.kuribo64.net"
 bin = ["melonDS"]
 install.windows = "Download from https://melonds.kuribo64.net/downloads.php"
 install.linux = "flatpak install flathub net.kuribo64.melonDS"
+install.macos = "brew install --cask melonds"
 
 [tools.emu-ps1]
 name = "DuckStation"
@@ -606,6 +666,7 @@ homepage = "https://github.com/stenzek/duckstation/releases"
 bin = ["duckstation-qt", "duckstation"]
 install.windows = "Download from https://github.com/stenzek/duckstation/releases/latest (needs your own BIOS dump)"
 install.linux = "Download the AppImage from https://github.com/stenzek/duckstation/releases/latest (needs your own BIOS dump)"
+install.macos = "Download duckstation-mac-release.zip from https://github.com/stenzek/duckstation/releases/latest (needs your own BIOS dump)"
 
 [tools.emu-ps2]
 name = "PCSX2"
@@ -614,6 +675,7 @@ homepage = "https://pcsx2.net/downloads"
 bin = ["pcsx2", "pcsx2-qt"]
 install.windows = "winget install --id PCSX2Team.PCSX2 -e   (needs your own BIOS dump)"
 install.linux = "flatpak install flathub net.pcsx2.PCSX2   (needs your own BIOS dump)"
+install.macos = "brew install --cask pcsx2   (needs your own BIOS dump)"
 
 [tools.emu-psp]
 name = "PPSSPP"
@@ -622,6 +684,7 @@ homepage = "https://www.ppsspp.org/download/"
 bin = ["PPSSPPSDL", "ppsspp", "PPSSPPWindows64"]
 install.windows = "winget install --id PPSSPPTeam.PPSSPP -e"
 install.linux = "flatpak install flathub org.ppsspp.PPSSPP"
+install.macos = "brew install --cask ppsspp-emulator"
 
 [tools.emu-gc]
 name = "Dolphin"
@@ -630,6 +693,7 @@ homepage = "https://dolphin-emu.org/download/"
 bin = ["dolphin-emu", "Dolphin"]
 install.windows = "Download from https://dolphin-emu.org/download/"
 install.linux = "flatpak install flathub org.DolphinEmu.dolphin-emu"
+install.macos = "brew install --cask dolphin"
 
 [tools.emu-xbox]
 name = "xemu"
@@ -638,6 +702,7 @@ homepage = "https://xemu.app"
 bin = ["xemu"]
 install.windows = "Download from https://xemu.app/#download"
 install.linux = "flatpak install flathub app.xemu.xemu"
+install.macos = "brew install --cask xemu"
 
 [tools.emu-xbox360]
 name = "Xenia Canary"
@@ -656,6 +721,7 @@ install.windows = "Download from https://rpcs3.net/download"
 install.linux = "Download the AppImage from https://rpcs3.net/download"
 
 # ============================================================================= routes
+install.macos = "Download the macOS build from https://rpcs3.net/download"
 
 [routes.base]
 label = "Base toolchain (every route)"

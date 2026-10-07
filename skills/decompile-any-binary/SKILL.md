@@ -1,15 +1,15 @@
 ---
 name: decompile-any-binary
-description: Decompile a binary the user owns (PC or console game, or other software) into a compilable PC reconstruction of its core program, re3-style - readable C++17 that builds with CMake on Windows and Linux and runs with assets extracted from the user's own copy. Covers intake and the done criterion, prior art, recon (format, compiler, engine, protections), tool checks, route choice (DLL-injection hybrid, clean-room rewrite, static recompilation, managed decompilation, engine project recovery), Ghidra via pyghidra-mcp, the function tracker, C++/CMake porting, the platform layer, asset extraction scripts, verification against the original, and field notes. Use when the user wants to decompile, reverse engineer, port, reimplement, recompile or "re3" an executable, ROM, game or engine ("decompile this exe", "make a PC port of my N64 game", "rebuild the engine from the binary", "get source code back from this game").
+description: Decompile a binary the user owns (PC or console game, or other software) into a compilable PC reconstruction of its core program, re3-style - readable C++17 that builds with CMake on Windows, Linux and macOS and runs with assets extracted from the user's own copy. Covers intake and the done criterion, prior art, recon (format, compiler, engine, protections), tool checks, route choice (DLL-injection hybrid, clean-room rewrite, static recompilation, managed decompilation, engine project recovery), Ghidra via pyghidra-mcp, the function tracker, C++/CMake porting, the platform layer, asset extraction scripts, verification against the original, and field notes. Use when the user wants to decompile, reverse engineer, port, reimplement, recompile or "re3" an executable, ROM, game or engine ("decompile this exe", "make a PC port of my N64 game", "rebuild the engine from the binary", "get source code back from this game").
 ---
 
 # Decompile any binary
 
 You are the decompiler. The user put a binary they own into `data/` of a fresh git repo, and you take it,
 autonomously, to a reconstruction that builds and runs and meets the done criterion agreed at intake. The
-reconstruction is readable C++ that builds with CMake on Windows (MSVC) and Linux (GCC/Clang), in the spirit
-of [re3](https://en.wikipedia.org/wiki/Re3_(software)). Copyrighted assets never enter the repo: you write a
-script the user runs on their own copy.
+reconstruction is readable C++ that builds with CMake on Windows (MSVC), Linux (GCC/Clang) and macOS
+(Apple Clang), in the spirit of [re3](https://en.wikipedia.org/wiki/Re3_(software)). Copyrighted assets
+never enter the repo: you write a script the user runs on their own copy.
 
 - Worked example, every step really run: `examples/tinyquest/` (the original, the reconstruction with its
   `DECOMPLOG.md`, `DECOMP_PLAN.md` and `tools/extract_assets.py`).
@@ -48,11 +48,11 @@ Companion skills: **binary-recon**, **reverse-engineering**, **cpp-reconstructio
   without a yes.
 - Remind the user that **this repo must stay private**: no public remote, ever (the pre-push hook refuses).
 - **Agree what "done" means** and write it into `DECOMP_PLAN.md`. Default proposal: the CMake project builds
-  on Windows (MSVC) and Linux (GCC or Clang) as 64-bit, launches with the extracted assets, and reaches an
-  agreed observable state (main menu, first level playable to a checkpoint, identical output for a scripted
-  run...). For vendor engines (Unity, Unreal, Godot, GameMaker) say now that the engine itself is not
-  reconstructed; the deliverable is the game's own code and project, buildable for Windows and Linux
-  through that engine.
+  on Windows (MSVC), Linux (GCC or Clang) and macOS (Apple Clang, arm64) as 64-bit, launches with the
+  extracted assets, and reaches an agreed observable state (main menu, first level playable to a
+  checkpoint, identical output for a scripted run...). For vendor engines (Unity, Unreal, Godot,
+  GameMaker) say now that the engine itself is not reconstructed; the deliverable is the game's own code
+  and project, buildable for Windows, Linux and macOS through that engine.
 - Run `ud init` if it hasn't been run (it's idempotent). Start `DECOMPLOG.md` as the journal: paths,
   addresses, function names, types, file formats, what failed and why, the next step. **Anything not in the
   journal is lost at the next context compaction.** Update it as you go, not at the end.
@@ -137,9 +137,9 @@ The original binary's behaviour is the reference; your reading of the code is no
 
 ### 10. Done check
 Verify every item of the agreed done criterion and record the evidence in `DECOMPLOG.md` (commands run,
-outputs, screenshots, which OS and compiler). Write the decomp repo's `README.md`: build steps for both
-OSes, asset extraction, known gaps. Items you couldn't verify (no Windows machine, say) stay unchecked
-with the reason.
+outputs, screenshots, which OS and compiler). Write the decomp repo's `README.md`: build steps for all three
+OSes, asset extraction, known gaps. Items you couldn't verify (no Windows machine or Mac, say) stay
+unchecked with the reason.
 
 ### 11. Field note (share-field-notes skill)
 Write a note with `ud kb new`, then `ud kb check`. **Open the PR (`ud kb pr --yes`) only after the user says

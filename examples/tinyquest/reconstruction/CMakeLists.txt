@@ -1,4 +1,5 @@
-# TinyQuest reconstruction. C++17, CMake >= 3.20; MSVC (x64) on Windows, GCC/Clang (x86-64) on Linux.
+# TinyQuest reconstruction. C++17, CMake >= 3.20; MSVC (x64) on Windows, GCC/Clang (x86-64) on Linux,
+# Apple Clang (arm64 or x86-64) on macOS.
 cmake_minimum_required(VERSION 3.20)
 project(tinyquest_reconstruction LANGUAGES CXX)
 

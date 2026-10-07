@@ -1,7 +1,7 @@
 # Consoles: N64, GBA, NDS, PS1, PS2, PSP, GameCube/Wii, Xbox, Xbox 360, PS3, Switch
 
 Deliverable: a **C++/CMake PC port** with a platform layer replacing the console SDK and hardware
-(`platform-layer.md`), building on Windows and Linux, loading assets that `tools/extract_assets.py` takes
+(`platform-layer.md`), building on Windows, Linux and macOS, loading assets that `tools/extract_assets.py` takes
 from the user's own dump. The user dumps their own disc or cartridge; never download ROMs, ISOs, BIOS
 or firmware. Encrypted executables are a protection: the user provides one they decrypted themselves on
 their own hardware; the agent never decrypts.

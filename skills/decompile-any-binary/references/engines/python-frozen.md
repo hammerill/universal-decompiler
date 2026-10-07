@@ -23,8 +23,8 @@ Git, Python 3.12+, uv, pyinstxtractor, PyLingual. Optional: pycdc.
 
 ## Deliverable shape
 A Python project (`pyproject.toml`, `src/<package>/`), dependency list with versions, data files restored
-from the user's copy by `tools/extract_assets.py`, README with `uv run` instructions for Windows and Linux.
-"Builds with CMake" doesn't apply here; the done criterion says "runs with uv on both OSes".
+from the user's copy by `tools/extract_assets.py`, README with `uv run` instructions for Windows, Linux and macOS.
+"Builds with CMake" doesn't apply here; the done criterion says "runs with uv on all three OSes".
 
 ## Known limits
 - Bytecode decompilation of recent Python versions isn't perfect: PyLingual verifies its output by

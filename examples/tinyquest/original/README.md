@@ -12,4 +12,5 @@ cd build/bin && ./tinyquest --render          # --seed N --ticks N --inputs UDLR
 Exit codes: 0 reached the exit, 2 died, 3 ran out of time, 10/11/12 asset errors.
 
 The build mimics a shipped game: optimised, functions kept apart (`-fno-inline`, like many older titles),
-every symbol stripped (`-s`; no PDB on MSVC), non-PIE on Linux so addresses are stable between runs.
+every symbol stripped (`-s`; `-Wl,-x` on macOS; no PDB on MSVC), non-PIE on Linux so addresses are stable
+between runs (macOS executables are always PIE).

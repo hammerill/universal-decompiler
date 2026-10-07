@@ -17,7 +17,7 @@ magic it is encrypted or obfuscated: `ud scan` stops; that's a protection, don't
 3. **Ghidra + pyghidra-mcp** on `GameAssembly.dll`: apply the names and signatures from Cpp2IL (its Ghidra
    script output), then reconstruct C# method bodies from the decompiled native code, method by method,
    tracked with `ud funcs` (import Cpp2IL's method list; keys are method names, addresses are RVAs).
-4. Open in the exact editor version, compile, build Windows and Linux players with the Mono or IL2CPP
+4. Open in the exact editor version, compile, build Windows, Linux and macOS players with the Mono or IL2CPP
    backend.
 
 ## Required tools (`ud tools check --route unity-il2cpp`)

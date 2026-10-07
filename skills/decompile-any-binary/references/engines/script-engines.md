@@ -2,7 +2,7 @@
 
 The game logic ships as scripts or bytecode on top of a runtime that isn't reconstructed. The deliverable
 is the **recovered source project**. All of these are quick to recover; the work is in making the result
-run under a current runtime on Windows and Linux.
+run under a current runtime on Windows, Linux and macOS.
 
 ## Detection signals (`ud scan`)
 | Engine | Signals |
@@ -39,7 +39,7 @@ unrpyc, Node.js + @electron/asar, JPEXS + a JDK.
 
 ## Deliverable shape
 The recovered project folder in `src/` (scripts, data files, project file), a runner setup (which
-runtime/SDK version, how to launch on Windows and Linux), `tools/extract_assets.py` that unpacks media from
+runtime/SDK version, how to launch on Windows, Linux and macOS), `tools/extract_assets.py` that unpacks media from
 the user's copy into a gitignored folder, README.
 
 ## Known limits

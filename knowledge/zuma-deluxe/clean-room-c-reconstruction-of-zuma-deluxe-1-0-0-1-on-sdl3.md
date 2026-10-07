@@ -15,6 +15,7 @@ tools:
 - ud 0.1.0
 - GCC 13.3 (Linux x86-64)
 - MinGW-w64 GCC 13 posix (Windows x64 cross)
+- Apple Clang (macOS arm64)
 - CMake 3.28
 - SDL 3.4.18
 - libopenmpt
@@ -37,8 +38,8 @@ tags:
 ---
 # Clean-room C++ reconstruction of Zuma Deluxe 1.0.0.1 on SDL3
 
-> A C++17/CMake reconstruction of Zuma Deluxe (PopCap's SexyApp framework, 2003) that builds 64-bit for Linux
-> and Windows on SDL3. Every game function was rewritten against the binary, using a public decomp of a
+> A C++17/CMake reconstruction of Zuma Deluxe (PopCap's SexyApp framework, 2003) that builds 64-bit for Linux,
+> Windows and macOS on SDL3. Every game function was rewritten against the binary, using a public decomp of a
 > different build only as a map. It runs from the loading screen through the menus and adventure map, and
 > Adventure 1-1 and 1-2 play to completion (driven by an autoplay aid). It loads saved games written by the
 > original, and all 38 sound effects decode bit-identical to what the original played.
@@ -77,7 +78,9 @@ binary.
 
 ## Build and run
 `cmake -S . -B build/rel -DCMAKE_BUILD_TYPE=Release && cmake --build build/rel -j`. A MinGW-w64 toolchain file
-cross-builds a static, self-contained zuma.exe that runs on Windows. tools/extract_assets.py copies the six
+cross-builds a static, self-contained zuma.exe that runs on Windows. On macOS (Xcode Command Line Tools +
+CMake) the same command line builds a native arm64 binary after two Clang fixes (see the tooling note on
+macOS); saves go to ~/Library/Application Support/PopCap/Zuma/. tools/extract_assets.py copies the six
 asset folders from the user's install and checks them against resources.xml and levels.xml. The program finds
 the game folder itself (cwd, ./data, next to the exe).
 

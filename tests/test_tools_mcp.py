@@ -68,6 +68,16 @@ def test_old_version_and_missing_tools(mocked_path):
     assert "(windows: winget install --id Kitware.CMake -e" in text
 
 
+def test_macos_gets_its_own_install_steps(mocked_path):
+    r = tools.check_route("native", "macos")
+    t = by_id(r)
+    assert t["screenshot-x11"]["available"] is False and t["x64dbg"]["available"] is False
+    assert t["gdb"]["available"] is True                   # LLDB on macOS
+    text = tools.format_check(r)
+    assert "brew install cmake" in text and "xcode-select --install" in text and "sudo apt" not in text
+    assert "(windows: winget install --id Kitware.CMake -e" in text
+
+
 def test_env_dir_tool_and_version_file(mocked_path, tmp_path, monkeypatch):
     g = tmp_path / "ghidra_12.1.4_PUBLIC"
     (g / "support").mkdir(parents=True)
@@ -107,7 +117,7 @@ def test_registry_is_consistent():
             assert tid in reg["tools"], f"route {rid} names unknown tool {tid}"
     for tid, spec in reg["tools"].items():
         assert spec.get("name") and spec.get("homepage"), tid
-        for osk in spec.get("platforms", ["windows", "linux"]):
+        for osk in spec.get("platforms", ["windows", "linux", "macos"]):
             assert spec.get("install", {}).get(osk), f"{tid}: no install steps for {osk}"
         assert any(k in spec for k in ("bin", "env", "paths", "pkgconfig", "python_module", "ghidra_extension")), tid
     # every route ud scan can suggest exists in the registry
@@ -182,6 +192,6 @@ def test_tools_show(mocked_path):
     fake_tool(mocked_path, "cmake", "cmake version 3.31.6")
     r = ud("tools", "show", "cmake", "--json", env={"PATH": os.environ["PATH"]})
     t = json.loads(r.stdout)
-    assert r.returncode == 0 and t["version"] == "3.31.6" and t["install"]["windows"] and t["install"]["linux"]
+    assert r.returncode == 0 and t["version"] == "3.31.6" and t["install"]["windows"] and t["install"]["linux"] and t["install"]["macos"]
     assert ud("tools", "show", "ghidra", env={"PATH": os.environ["PATH"]}).returncode == 1     # not installed in the mock
     assert ud("tools", "show", "nope", env={"PATH": os.environ["PATH"]}).returncode == 2

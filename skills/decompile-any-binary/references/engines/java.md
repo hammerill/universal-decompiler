@@ -10,7 +10,7 @@ built to defeat protection (string encryption, control-flow obfuscation): stop a
 ## Route
 `managed-decompile`: Vineflower (`java -jar vineflower.jar data/Game.jar build/decompiled/`) produces Java
 sources; restructure into a **Gradle or Maven** project; replace the bundled native libraries with
-current LWJGL 3 / libGDX artifacts from Maven Central for Windows and Linux; fix decompilation errors until
+current LWJGL 3 / libGDX artifacts from Maven Central for Windows, Linux and macOS; fix decompilation errors until
 `gradle build` passes.
 
 ## Required tools (`ud tools check --route java`)
@@ -20,7 +20,7 @@ Git, Python 3.12+, uv, a JDK (the game's major version or newer), Vineflower. Op
 ## Deliverable shape
 `build.gradle(.kts)` or `pom.xml`, `src/main/java/...`, resources restored from the user's jar by
 `tools/extract_assets.py` into a gitignored folder (or read from the user's jar at runtime), a run task for
-Windows and Linux, README.
+Windows, Linux and macOS, README.
 
 ## Known limits
 - Lambdas, switch-on-string/enum and synthetic accessors need cleanup; generics may be erased in places.

@@ -1,7 +1,7 @@
 # Godot
 
 The engine is open source (MIT) and is **not reconstructed**: the deliverable is the game's project,
-reopenable in the matching Godot version and exportable for Windows and Linux. Unlike other vendor engines,
+reopenable in the matching Godot version and exportable for Windows, Linux and macOS. Unlike other vendor engines,
 the engine itself is available, so a custom-built engine (modules, patches) can be rebuilt from the
 official source if the game needs it.
 
@@ -23,7 +23,7 @@ Optional: .NET SDK + ilspycmd.
 ## Deliverable shape
 A Godot project folder (`project.godot`, scenes, scripts), with imported assets restored by
 `tools/extract_assets.py` (which re-runs GDRE Tools' extraction on the user's copy into a gitignored folder),
-export presets for Windows and Linux, README.
+export presets for Windows, Linux and macOS, README.
 
 ## Known limits
 - GDScript bytecode decompiles well but comments and some formatting are gone; Godot 4 tokenised scripts

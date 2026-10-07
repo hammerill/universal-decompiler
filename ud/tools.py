@@ -1,5 +1,5 @@
 """Check the tools a route needs. Never installs anything: missing tools come with exact install steps for
-Windows and Linux, which the agent hands to the user before stopping.
+Windows, Linux and macOS, which the agent hands to the user before stopping.
 
     ud tools check --route native        # Ghidra, JDK, pyghidra-mcp, CMake, a C++ compiler, ...
     ud tools check --route unity-il2cpp --json
@@ -71,8 +71,8 @@ def ghidra_extension_dirs() -> list[Path]:
 def check_tool(tid: str, spec: dict, osk: str | None = None) -> dict:
     osk = osk or os_key()
     res: dict = dict(id=tid, name=spec.get("name", tid), found=False, path=None, version=None, ok=False, homepage=spec.get("homepage"))
-    platforms = spec.get("platforms", ["windows", "linux"])
-    if osk not in platforms and not (osk == "macos" and "linux" in platforms):
+    platforms = spec.get("platforms", ["windows", "linux", "macos"])
+    if osk not in platforms:
         res.update(available=False, note=f"not available on {osk} (runs on: {', '.join(platforms)})")
         return res
     res["available"] = True
@@ -136,7 +136,7 @@ def check_tool(tid: str, spec: dict, osk: str | None = None) -> dict:
         elif not res["version"]:
             res["note"] = f"couldn't read the version (needs {spec['min_version']}+)"
     install = spec.get("install", {})
-    res["install"] = {k: install[k] for k in ("windows", "linux") if k in install}
+    res["install"] = {k: install[k] for k in ("windows", "linux", "macos") if k in install}
     return res
 
 
@@ -159,7 +159,7 @@ def check_route(route: str, osk: str | None = None) -> dict:
 
 
 def format_check(r: dict) -> str:
-    osk = r["os"] if r["os"] in ("windows", "linux") else "linux"
+    osk = r["os"] if r["os"] in ("windows", "linux", "macos") else "linux"
     L = [f"route {r['route']}: {r['label']}  (on {r['os']})"]
     for kind in ("required", "optional"):
         if not r[kind]:

@@ -8,6 +8,7 @@ original is our own example program.
 ## Build
 - Windows (MSVC, x64): `cmake -S . -B build -A x64` then `cmake --build build --config Release`
 - Linux (GCC or Clang, x86-64): `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release` then `cmake --build build -j`
+- macOS (Apple Clang, arm64 or x86-64): the same as Linux
 - Or `ud build` (reads `ud.toml`)
 
 The executable lands in `build/bin/tinyquest` (`build\bin\tinyquest.exe` on Windows).

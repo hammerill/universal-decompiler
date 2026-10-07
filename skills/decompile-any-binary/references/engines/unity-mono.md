@@ -1,7 +1,7 @@
 # Unity (Mono)
 
 The engine belongs to Unity Technologies and is **not reconstructed**. The deliverable is the game's own
-code and project, reopenable in the matching Unity editor and buildable for Windows and Linux from it.
+code and project, reopenable in the matching Unity editor and buildable for Windows, Linux and macOS from it.
 State this at intake and set the done criterion accordingly.
 
 ## Detection signals
@@ -17,8 +17,8 @@ State this at intake and set the done criterion accordingly.
    AssetRipper's output needs replacing.
 3. Open in the **exact** editor version from `ud scan`; fix compile errors (missing packages, editor-only
    code, plugin DLLs), restore package versions from `Packages/manifest.json` and `ScriptingAssemblies.json`.
-4. Build Windows and Linux players from the editor.
-Native plugins (`Plugins/x86_64/*.dll`) need Linux equivalents or stubs; that's the native route in
+4. Build Windows, Linux and macOS players from the editor.
+Native plugins (`Plugins/x86_64/*.dll`) need Linux (`.so`) and macOS (`.dylib`/`.bundle`) equivalents or stubs; that's the native route in
 miniature.
 
 ## Required tools (`ud tools check --route unity-mono`)

@@ -8,7 +8,7 @@ original prints.
 |---|---|
 | [`original/`](original/) | The "original": a tiny C-style game engine (`src/tinyquest.cpp`), its CMake build (optimised, `-fno-inline`, stripped; `/O1` without a PDB on MSVC), and `make_pack.py`, which packs `assets_src/` into `tinyquest.pak`: the dummy asset archive that stands in for "the user's own copy". |
 | [`reconstruction/`](reconstruction/) | The decomp repo the workflow produced: `DECOMPLOG.md` (the journal), `DECOMP_PLAN.md` (done criterion, route, module map), C++ with every function's original address, `tools/extract_assets.py` (a PEP 723 script that decodes the archive format it found in the binary), `decomp/progress.json` (`ud funcs`), `ud.toml`. |
-| [`run_example.py`](run_example.py) | The end-to-end check CI runs on Windows (MSVC) and Linux (GCC): build the original, make the pack, put both into `data/` of a fresh copy of the decomp repo, extract the assets, `ud build`, `ud run --compare` on seven argument sets, `ud publish check`. |
+| [`run_example.py`](run_example.py) | The end-to-end check CI runs on Windows (MSVC), Linux (GCC) and macOS (Apple Clang, arm64): build the original, make the pack, put both into `data/` of a fresh copy of the decomp repo, extract the assets, `ud build`, `ud run --compare` on seven argument sets, `ud publish check`. |
 
 ## Try it
 ```bash

@@ -43,7 +43,7 @@ Checked on GitHub (repo status, latest release redirect), PyPI, npm and Maven Ce
   Claude Code config needs `"type": "http"` (an entry with only `url` is read as stdio). `ud mcp` follows
   that README, not memory.
 - ilspycmd **10.1.1** (`dotnet tool install --global ilspycmd`).
-- AssetRipper **2.0.0** (zip per OS: `AssetRipper_win_x64.zip`, `AssetRipper_linux_x64.zip`).
+- AssetRipper **2.0.0** (per OS: `AssetRipper_win_x64.zip`, `AssetRipper_linux_x64.tar.xz`, `AssetRipper_mac_arm64.tar.xz`).
 - Cpp2IL: maintained (pushed 2026-09). **Il2CppDumper: last push 2024-08 → treated as unmaintained.**
   Substitution: Cpp2IL is the primary IL2CPP tool; Il2CppDumper stays as an optional fallback only.
 - FModel (release `aug-2026`) is **Windows-only** (.NET WPF); `tools.toml` marks it `platforms=["windows"]`.
@@ -170,3 +170,27 @@ the agent never decrypts. Same treatment as Denuvo/SteamStub on PC.
   `.codex\config.toml`, while `mcp.AGENTS` (and the test) use `/`. Decision: every path a `ud` command reports
   (JSON or text) is `Path.as_posix()`, so output is identical across OSes and comparable with the registry
   and config values. Applied to `mcp`, `build`, `run`, `assets` and `publish`.
+
+## 2026-10-07
+
+### macOS as a default target
+- **Decision:** reconstructions target Windows, Linux **and macOS** (Apple Clang, arm64 native; x86-64 or
+  universal via `CMAKE_OSX_ARCHITECTURES` on request). Prompted by the Zuma Deluxe reconstruction, which
+  needed only two kinds of source fix to build on an arm64 Mac (`register`, narrowing in braces: GCC warns,
+  Clang errors). Skills, playbooks, the done-criterion template, README templates and `cpp-port.md` (new
+  "macOS" section) say so; field note `knowledge/tooling/building-reconstructions-on-macos-apple-clang-arm64.md`.
+- **`tools.toml`:** `platforms` defaults to windows, linux, macos, and every tool that runs on macOS has
+  `install.macos` (a test enforces one install step per platform). Before, macOS silently got the Linux steps,
+  i.e. `apt`. Homebrew names checked with `brew info` (sdl3 3.4.18, sevenzip, temurin@21, dotnet-sdk,
+  unity-hub, epic-games, godot, mgba-app, ppsspp-emulator, ...) and macOS release assets on the GitHub release
+  pages (AssetRipper `_mac_arm64.tar.xz`, GDRE `-macos.zip`, UTMT CLI `-macOS.zip`, dtk/objdiff
+  `-macos-arm64`, extract-xiso `_macOS.zip`, JPEXS `_macosx.zip`, DuckStation `-mac-release.zip`).
+  RPGMakerDecrypter has no macOS build: build from source. AssetRipper 2.0.0 ships Linux/macOS as `.tar.xz`
+  (the Linux step said `.zip`; fixed). `gdb` is now "GDB or LLDB" for Linux and macOS.
+- **TinyQuest's original** gets an `APPLE` branch: no `-no-pie` (macOS executables are always PIE), `-Wl,-x`
+  instead of the obsolete `-s`. Same result (only imports left in the symbol table), no warnings.
+- **CI:** `macos-latest` (arm64) added to the test, example and scaffold-sdl3 matrices.
+- **Verified locally** on macOS 26 (Darwin 25.6) arm64, Apple Clang 21, CMake 4.1: `uv run pytest`,
+  `ruff check`, `examples/tinyquest/run_example.py` (7/7 MATCH), `ud init --scaffold` + `ud build` (SDL3
+  fetched, Cocoa backend) + headless run, `ud tools check --route native`. **Not verified:** `ud run --shot` on
+  macOS (it captures the whole screen; not run here) and the macOS CI jobs (not pushed).

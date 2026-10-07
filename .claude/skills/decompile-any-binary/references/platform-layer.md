@@ -7,7 +7,7 @@ in October 2026). `ud init --scaffold` writes a starting point: `src/platform/pl
 and a headless null backend.
 
 ## Why a layer
-- One place to port: Windows and Linux (and anything SDL3 supports) from the same game code.
+- One place to port: Windows, Linux and macOS (and anything SDL3 supports) from the same game code.
 - A headless backend for CI and oracle runs (`--headless`, fixed time step, no window).
 - Faithful timing and input semantics can be emulated in one spot instead of all over the game code.
 
@@ -37,8 +37,8 @@ after the original API ("IDirect3DDevice9::Present").
 | DirectInput, raw input, XInput | SDL keyboard state, mouse, SDL gamepad API |
 | DirectSound, XAudio2, waveOut, Miles, FMOD playback | SDL audio streams (or miniaudio) with a small mixer in the layer |
 | `GetTickCount`, `timeGetTime`, `QueryPerformanceCounter` | `ticks_ms()` / a high-resolution counter (SDL_GetTicksNS); keep the original's frame pacing |
-| `CreateFile`/`fopen` with `\` paths, case-insensitive names | `read_file()` + path normalisation; Linux needs case-insensitive lookup for data from Windows games |
-| Registry settings | a config file next to the user's data (TOML/INI) |
+| `CreateFile`/`fopen` with `\` paths, case-insensitive names | `read_file()` + path normalisation; Linux (and case-sensitive macOS volumes) need case-insensitive lookup for data from Windows games |
+| Registry settings, `%APPDATA%` saves | a config file in the per-user folder from `SDL_GetPrefPath` (`%APPDATA%`, `~/.local/share`, `~/Library/Application Support`) |
 | `MessageBox` | SDL_ShowSimpleMessageBox |
 | Threads, critical sections | `std::thread`, `std::mutex` |
 | Winsock, DirectPlay, GameSpy | sockets behind the layer for LAN play; stub online services |

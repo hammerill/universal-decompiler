@@ -44,7 +44,7 @@ You just decompiled (or tried to decompile) something and learned things. Share 
   `--json` on anything that reports; exit codes 0 ok / 1 problem found / 2 usage error; a test in `tests/`;
   `uv run pytest` and `uv run ruff check` must pass.
 - **Tool registry (`ud/tools.toml`):** check the tool's current name, maintenance status and install method
-  at its official source before adding it, give Windows and Linux steps, and note substitutions in
+  at its official source before adding it, give Windows, Linux and macOS steps (for each platform it runs on), and note substitutions in
   `DEVLOG.md`.
 - **Skills (`skills/`):** Agent Skills format (`SKILL.md` with `name` + `description`), agent-neutral
   wording, deep material in `references/`. Edit `skills/` only, then `python scripts/sync_skills.py`

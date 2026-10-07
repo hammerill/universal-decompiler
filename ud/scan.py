@@ -34,7 +34,7 @@ SKILL = "skills/decompile-any-binary"
 # family key: (label, playbook, deliverable)
 FAMILIES = {
     "native": ("Native PC (C/C++)", "native-pc.md", "re3-style C++17/CMake reconstruction"),
-    "dotnet": (".NET / XNA / FNA / MonoGame", "dotnet.md", "C# solution that builds with `dotnet` on Windows and Linux"),
+    "dotnet": (".NET / XNA / FNA / MonoGame", "dotnet.md", "C# solution that builds with `dotnet` on Windows, Linux and macOS"),
     "unity-mono": ("Unity (Mono)", "unity-mono.md", "project reopenable in the matching Unity editor version"),
     "unity-il2cpp": ("Unity (IL2CPP)", "unity-il2cpp.md", "project reopenable in the matching Unity editor, with IL2CPP's recovery limits"),
     "unreal": ("Unreal Engine 3/4/5", "unreal.md", "best achievable editor project; limits stated honestly"),
@@ -546,7 +546,7 @@ def scan(target: str, context: bool = True, deep: bool = True) -> dict:
                             "(e.g. DLL injection)")
     if family in EDITOR_FAMILIES:
         warnings.append(f"{FAMILIES[family][0]}: the engine belongs to its vendor and is not reconstructed. Tell the user at intake; the "
-                        "deliverable is the game's own code and project, buildable for Windows and Linux through that engine.")
+                        "deliverable is the game's own code and project, buildable for Windows, Linux and macOS through that engine.")
     if ix and ix.truncated:
         warnings.append("file index truncated (huge folder): pass a subfolder or the executable for detail")
     if ekey == "rpgmaker-2k":

@@ -1,9 +1,10 @@
 # C++ and CMake conventions for reconstructions
 
 ## Baseline
-- **C++17 minimum, CMake 3.20 or newer.** Builds with MSVC on Windows and GCC or Clang on Linux; CI-style
-  check on both before claiming done.
-- **Release target: 64-bit on both OSes** (Windows x64, Linux x86-64). A 32-bit build is allowed only as an
+- **C++17 minimum, CMake 3.20 or newer.** Builds with MSVC on Windows, GCC or Clang on Linux and Apple Clang
+  on macOS; CI-style check on all three before claiming done.
+- **Release target: 64-bit on every OS** (Windows x64, Linux x86-64, macOS arm64; x86-64 or a universal
+  binary on request, see below). A 32-bit build is allowed only as an
   intermediate step (the hybrid route's DLL injected into a 32-bit original). The CMake skeleton warns on
   32-bit builds.
 - One predictable output folder: `build/bin/<target>[.exe]` (`RUNTIME_OUTPUT_DIRECTORY
@@ -60,7 +61,7 @@ originals merge into one function, list both addresses.
 ## 32 -> 64-bit pitfalls
 - **Pointer size in data structures.** Structs read from files or memory dumps with 32-bit pointers or `long`
   fields: use explicit `uint32_t` offsets in the file format and convert to pointers after loading.
-  `long` is 32-bit on Windows and 64-bit on Linux: never use it for on-disk data.
+  `long` is 32-bit on Windows and 64-bit on Linux and macOS: never use it for on-disk data.
 - **Pointers stored in ints** (handles, IDs, callbacks in 32-bit fields): use `uintptr_t` or an index table.
 - **`size_t` vs `int` arithmetic**: negative values and comparisons change meaning; keep the original's
   signedness in loops that the oracle observes.
@@ -71,9 +72,42 @@ originals merge into one function, list both addresses.
   original's float order, and compare traces.
 - **Calling conventions** disappear on x64 (`__stdcall`/`__fastcall` are ignored): fine for the clean
   rewrite, but the hybrid DLL must match them exactly while it's still 32-bit.
-- **`wchar_t`** is 16-bit on Windows, 32-bit on Linux: use `char16_t`/UTF-8 for text from the original's data.
+- **`wchar_t`** is 16-bit on Windows, 32-bit on Linux and macOS: use `char16_t`/UTF-8 for text from the original's data.
 - **Time and randomness**: replace `GetTickCount`/`timeGetTime`/`rand()` behind the platform layer, and keep
   the original's RNG algorithm when its sequence is observable.
+
+## macOS (Apple Clang, arm64)
+The same CMake project builds on macOS with the Xcode Command Line Tools (`xcode-select --install`: Apple
+Clang, libc++, git) and CMake, with the Linux command line (`cmake -S . -B build -DCMAKE_BUILD_TYPE=Release`).
+The build is native (arm64 on Apple silicon); `-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"` makes a universal
+binary, and Rosetta 2 runs an x86-64 build when you need to rule out the architecture. SDL3 fetched by
+CMake builds its Cocoa, Metal and CoreAudio backends with nothing else installed. A code base that builds
+with GCC usually needs only small fixes:
+- **Clang rejects what GCC only warns about**, and decompiled or 2000s-era code has plenty of it:
+  - `register` is ill-formed in C++17 (Clang: error, GCC: warning). Delete the keyword.
+  - Narrowing a non-constant inside braces is an error in Clang (`-Wc++11-narrowing`), a warning in GCC:
+    `float px[4] = { 0, rect.mWidth }` with an `int` field, `char s[2] = { code - 0x80, 0 }`. Add the
+    explicit cast, and cast the result of the expression, not an operand, so the value stays the original's.
+  - Build on macOS early (or with Clang on Linux) instead of collecting these at the end.
+- **Missing glibc-isms:** `<malloc.h>` (use `<cstdlib>`), `<endian.h>`/`<byteswap.h>` (write the swap or use
+  `__builtin_bswap32`), `fopen64`/`off64_t`/`lseek64` (the plain ones are 64-bit already), `memalign`
+  (`posix_memalign`), unnamed POSIX semaphores (`sem_init` fails on macOS: use `std::condition_variable` or
+  SDL's semaphores), `pthread_setname_np(thread, name)` (macOS takes only the name, for the calling thread).
+- **arm64 is not x86:** inline assembly, `<xmmintrin.h>`/SSE intrinsics, `__rdtsc`, `_controlfp` and other
+  x87 control-word tricks don't exist. Port them to plain C++ (keep x86 fast paths behind
+  `#if defined(__x86_64__) || defined(_M_X64)` if they matter). Clang fuses `a * b + c` into one
+  multiply-add on arm64, which changes the last bits of float results: build with `-ffp-contract=off` when
+  the oracle compares floats.
+- **`char` is signed** on macOS arm64 (Apple's ABI keeps the x86 choice), like the MSVC original; it is
+  unsigned on Linux arm64, so a Linux arm64 build needs `-fsigned-char` or explicit `signed char`.
+- **Per-user data** goes to `~/Library/Application Support/<org>/<app>/`: `SDL_GetPrefPath` returns it, so
+  don't hardcode `~/.local/share`. APFS is case-insensitive by default but can be formatted case-sensitive:
+  keep the case-insensitive asset lookup instead of relying on it.
+- **Linking:** executables are always position-independent (drop `-no-pie`), Apple's `ld` calls `-s`
+  obsolete (use `-Wl,-x` or `strip`), and arm64 binaries must be code-signed: the linker signs ad hoc by
+  itself, so re-sign (`codesign -s - -f <exe>`) only after patching a binary. A plain executable runs from
+  the terminal; an `.app` bundle (`MACOSX_BUNDLE`) is optional packaging.
+- **Debugging:** `lldb` (GDB doesn't run on Apple silicon); AddressSanitizer works with Apple Clang.
 
 ## The hybrid route (DLL injection), in CMake
 - A `SHARED` library target built for the original's architecture (`-A Win32` with MSVC for 32-bit

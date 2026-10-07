@@ -9,7 +9,7 @@
 
 ## Route
 `managed-decompile`: `ilspycmd -p -o build/decompiled <Game>.exe` (and each game DLL) produces C# projects;
-move the result into `src/`, make it build with `dotnet build` on Windows and Linux, then fix what the
+move the result into `src/`, make it build with `dotnet build` on Windows, Linux and macOS, then fix what the
 decompiler got wrong. XNA games move to **FNA** (an open, accurate reimplementation of XNA 4.0) or
 MonoGame so they run on Linux; that is the middleware replacement for this family. Native helper DLLs
 (P/Invoke) go through the native route.

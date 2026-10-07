@@ -30,7 +30,7 @@ Optional: Ninja, SDL3 dev files (otherwise fetched by CMake), x64dbg (Windows) o
 ## Deliverable shape
 A CMake project: `src/` per module with original addresses in comments, `src/platform/` (SDL3 + headless),
 open middleware replacements under `third_party/` or fetched, `tools/extract_assets.py`,
-`decomp/progress.json`, README with Windows and Linux build steps. During the hybrid phase, also the
+`decomp/progress.json`, README with Windows, Linux and macOS build steps. During the hybrid phase, also the
 injectable DLL target.
 
 ## Known limits

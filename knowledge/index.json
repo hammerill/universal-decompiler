@@ -1,5 +1,31 @@
 [
  {
+  "path": "tooling/building-reconstructions-on-macos-apple-clang-arm64.md",
+  "kind": "topic",
+  "title": "Building reconstructions on macOS (Apple Clang, arm64)",
+  "family": "tooling",
+  "status": "working",
+  "tools": [
+   "Apple Clang 21 (Xcode Command Line Tools)",
+   "CMake 4.1",
+   "SDL 3.4.18",
+   "ud 0.1.0"
+  ],
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-07",
+  "links": [],
+  "tags": [
+   "macos",
+   "arm64",
+   "clang",
+   "portability",
+   "cmake"
+  ]
+ },
+ {
   "path": "tooling/decoding-ogg-sound-like-2003-era-bass-games-tremor-not-libvo.md",
   "kind": "topic",
   "title": "Decoding OGG sound like 2003-era BASS games: Tremor, not libvorbis or stb_vorbis",
@@ -136,6 +162,7 @@
    "ud 0.1.0",
    "GCC 13.3 (Linux x86-64)",
    "MinGW-w64 GCC 13 posix (Windows x64 cross)",
+   "Apple Clang (macOS arm64)",
    "CMake 3.28",
    "SDL 3.4.18",
    "libopenmpt",

@@ -7,6 +7,8 @@ refuses). The original binary and every extracted asset stay in `data/`, which i
 ## Build
 - Windows (MSVC, x64): `cmake -S . -B build -A x64` then `cmake --build build --config Release`
 - Linux (GCC or Clang, x86-64): `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release` then `cmake --build build -j`
+- macOS (Apple Clang from the Xcode Command Line Tools, arm64 or x86-64): the same as Linux; add
+  `-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"` for a universal binary
 - Or: `ud build --config Release`
 
 ## Assets

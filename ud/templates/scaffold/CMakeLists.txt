@@ -1,4 +1,5 @@
-# Reconstruction skeleton written by `ud init --scaffold`. C++17, CMake >= 3.20, MSVC on Windows, GCC/Clang on Linux.
+# Reconstruction skeleton written by `ud init --scaffold`. C++17, CMake >= 3.20, MSVC on Windows, GCC/Clang on Linux,
+# Apple Clang on macOS (native arch; -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" for a universal binary).
 cmake_minimum_required(VERSION 3.20)
 project(reconstruction LANGUAGES C CXX)
 

@@ -1,6 +1,6 @@
 ---
 name: verify-and-run
-description: Build, launch and verify a reconstruction against the original binary, which is the oracle - ud build error summaries, ud run (capture stdout/stderr and log files, window screenshots on Windows and Linux, kill by exact PID at a timeout), side-by-side runs and ud run --compare for deterministic output, repeatable scenarios (seeds, scripted input, traces), and the 3-strike circuit breaker. Use whenever the reconstruction must be built, run, tested, compared with the original, or when something fails repeatedly.
+description: Build, launch and verify a reconstruction against the original binary, which is the oracle - ud build error summaries, ud run (capture stdout/stderr and log files, window screenshots on Windows, Linux and macOS, kill by exact PID at a timeout), side-by-side runs and ud run --compare for deterministic output, repeatable scenarios (seeds, scripted input, traces), and the 3-strike circuit breaker. Use whenever the reconstruction must be built, run, tested, compared with the original, or when something fails repeatedly.
 ---
 
 # Verify and run
@@ -29,7 +29,9 @@ ud run --json -- <args>
   0xC0000005) returns 1; a plain non-zero exit code is reported, not judged.
 - Processes are killed by exact PID (the process group/tree `ud run` started). Never `pkill -f`.
 - Screenshots: Windows (also from WSL) via PrintWindow on the process's window; Linux X11 via
-  xdotool + ImageMagick; Wayland via grim (whole screen). Install hints: `ud tools show screenshot-x11`.
+  xdotool + ImageMagick; Wayland via grim (whole screen); macOS via `screencapture` (whole screen; the
+  terminal running the agent needs Screen Recording permission, otherwise the shot shows only the desktop).
+  Install hints: `ud tools show screenshot-x11`.
 
 ## Make the comparison repeatable
 - **Determinism:** fix seeds (command-line flag, or patch the RNG seed via the hybrid DLL), fixed time

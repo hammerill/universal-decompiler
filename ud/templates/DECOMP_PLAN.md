@@ -11,10 +11,11 @@
 <!-- Default proposal; edit it with the user, then keep it fixed. Every item needs evidence in DECOMPLOG.md. -->
 - [ ] The CMake project builds on Windows with MSVC as 64-bit
 - [ ] The CMake project builds on Linux with GCC or Clang as 64-bit
+- [ ] The CMake project builds on macOS with Apple Clang (arm64; x86-64 or universal if wanted)
 - [ ] It launches with the assets extracted by `tools/extract_assets.py` from the user's own copy
 - [ ] It reaches: <!-- observable state, e.g. "main menu", "first level playable to the first checkpoint" -->
 <!-- Vendor-engine families (Unity, Unreal, Godot, GameMaker): the engine is not reconstructed; the criterion is
-     "the recovered project opens in <editor version> and builds for Windows and Linux". -->
+     "the recovered project opens in <editor version> and builds for Windows, Linux and macOS". -->
 
 ## Recon (`ud scan`)
 - Format / arch / bitness:

@@ -1,6 +1,6 @@
 ---
 name: cpp-reconstruction
-description: Turn decompiler output into buildable, behaviour-faithful C++17 with CMake that compiles with MSVC on Windows and GCC/Clang on Linux as 64-bit - project layout, original-address comments, structs from offsets, the platform layer (SDL3) replacing Win32/DirectX/console SDKs, replacing proprietary middleware with open equivalents (librw-style), the re3-style DLL-injection hybrid, and 32-to-64-bit porting pitfalls. Use when writing or fixing the reconstruction's code, setting up its CMake build, or porting it off the original platform.
+description: Turn decompiler output into buildable, behaviour-faithful C++17 with CMake that compiles with MSVC on Windows, GCC/Clang on Linux and Apple Clang on macOS as 64-bit - project layout, original-address comments, structs from offsets, the platform layer (SDL3) replacing Win32/DirectX/console SDKs, replacing proprietary middleware with open equivalents (librw-style), the re3-style DLL-injection hybrid, 32-to-64-bit porting pitfalls, and the macOS/arm64 fixes (Clang strictness, missing glibc headers, x86 intrinsics). Use when writing or fixing the reconstruction's code, setting up its CMake build, or porting it off the original platform.
 ---
 
 # C++ reconstruction
@@ -52,7 +52,10 @@ and a table to switch each replacement off for bisecting. Then the standalone 64
 `cpp-port.md`.
 
 ## Portability checklist before calling it done
-- Builds from a clean `build/` with MSVC x64 and with GCC or Clang on x86-64, no warnings you didn't look at.
+- Builds from a clean `build/` with MSVC x64, with GCC or Clang on x86-64 Linux and with Apple Clang on macOS
+  arm64, no warnings you didn't look at.
 - No `long` in file formats, no pointers in 32-bit fields, `wchar_t` handled, case-insensitive asset lookup on
-  Linux, paths with `/`.
+  Linux and macOS, paths with `/`, per-user files under the platform's own folder (`SDL_GetPrefPath`).
+- No `register`, no narrowing inside braces, no glibc-only headers, no x86 intrinsics or inline assembly
+  without a portable path (`cpp-port.md`, "macOS").
 - The null/headless backend still builds (oracle runs depend on it).
