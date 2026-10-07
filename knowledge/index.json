@@ -1,5 +1,27 @@
 [
  {
+  "path": "tooling/decoding-ogg-sound-like-2003-era-bass-games-tremor-not-libvo.md",
+  "kind": "topic",
+  "title": "Decoding OGG sound like 2003-era BASS games: Tremor, not libvorbis or stb_vorbis",
+  "family": "tooling",
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-07",
+  "links": [
+   "https://gitlab.xiph.org/xiph/tremor"
+  ],
+  "tags": [
+   "audio",
+   "vorbis",
+   "bass",
+   "popcap",
+   "oracle"
+  ]
+ },
+ {
   "path": "tooling/ghidra-headless-export-and-decompile.md",
   "kind": "topic",
   "title": "Ghidra headless: export the function list and decompile everything for ud",
@@ -94,5 +116,48 @@
   "humans": [],
   "date": "2026-10-06",
   "links": []
+ },
+ {
+  "path": "zuma-deluxe/clean-room-c-reconstruction-of-zuma-deluxe-1-0-0-1-on-sdl3.md",
+  "kind": "title",
+  "title": "Clean-room C++ reconstruction of Zuma Deluxe 1.0.0.1 on SDL3",
+  "subject": "Zuma Deluxe",
+  "subject_version": "1.0.0.1, MSN/Zone partner build (Dec 2003), ZumaDeluxe.exe 1,290,240 bytes, sha256 823d573e68cdc49f...",
+  "platform": "windows",
+  "family": "native",
+  "engine": "unknown",
+  "route": "clean-room",
+  "formats": [
+   "PE32 x86 32-bit"
+  ],
+  "compiler": "Microsoft Visual C++ Visual Studio .NET 2002 (7.0) [build 9466]",
+  "tools": [
+   "Ghidra 12.1.4 (headless + pyghidra-mcp)",
+   "ud 0.1.0",
+   "GCC 13.3 (Linux x86-64)",
+   "MinGW-w64 GCC 13 posix (Windows x64 cross)",
+   "CMake 3.28",
+   "SDL 3.4.18",
+   "libopenmpt",
+   "Tremor (xiph, 2025-04-02)"
+  ],
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-07",
+  "links": [
+   "https://github.com/alula/CircleShootApp"
+  ],
+  "tags": [
+   "popcap",
+   "sexyapp",
+   "bass",
+   "mo3",
+   "vorbis",
+   "audio",
+   "savegame"
+  ]
  }
 ]
