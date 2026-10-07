@@ -58,4 +58,6 @@ and a table to switch each replacement off for bisecting. Then the standalone 64
   Linux and macOS, paths with `/`, per-user files under the platform's own folder (`SDL_GetPrefPath`).
 - No `register`, no narrowing inside braces, no glibc-only headers, no x86 intrinsics or inline assembly
   without a portable path (`cpp-port.md`, "macOS").
+- On macOS the default output is a bare executable; a `.app` bundle is an extra `app` target added only when
+  the user asks for one (`cpp-port.md`, "App bundle").
 - The null/headless backend still builds (oracle runs depend on it).

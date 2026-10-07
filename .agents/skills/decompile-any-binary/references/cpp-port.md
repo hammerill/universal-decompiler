@@ -106,8 +106,38 @@ with GCC usually needs only small fixes:
 - **Linking:** executables are always position-independent (drop `-no-pie`), Apple's `ld` calls `-s`
   obsolete (use `-Wl,-x` or `strip`), and arm64 binaries must be code-signed: the linker signs ad hoc by
   itself, so re-sign (`codesign -s - -f <exe>`) only after patching a binary. A plain executable runs from
-  the terminal; an `.app` bundle (`MACOSX_BUNDLE`) is optional packaging.
+  the terminal, and that is the default macOS output (see "App bundle" below for the on-request one).
 - **Debugging:** `lldb` (GDB doesn't run on Apple silicon); AddressSanitizer works with Apple Clang.
+
+### App bundle (only when the user asks)
+The default build stays a bare executable (`build/<dir>/bin/<name>`), as on Linux: `ud build`, `ud run` and
+the oracle comparisons use it, and the done criterion doesn't need more. When the user wants a
+double-clickable Mac application, add a separate `app` target in an `if(APPLE)` block instead of putting
+`MACOSX_BUNDLE` on the main target (which would move the executable into `.app/Contents/MacOS/` for every
+build). `cmake --build build/mac --target app` then makes `build/mac/<Title>.app`:
+- **`add_custom_target(app ... DEPENDS <exe> VERBATIM)`** that deletes and recreates the bundle each time:
+  `Contents/MacOS/<exe>` (`$<TARGET_FILE:...>`), `Contents/Info.plist`, the game's files under
+  `Contents/Resources/`, the icon, then `codesign --force --sign - "<bundle>"`. Sign last: changing anything
+  in the bundle afterwards breaks the signature, and arm64 refuses to run it.
+- **`Info.plist`** from `cmake/Info.plist.in` with `configure_file(... @ONLY)`: `CFBundleExecutable` =
+  the target name, `CFBundleIconFile`, `CFBundleIdentifier` (a local one, like `local.<project>`, never the
+  original publisher's), `CFBundlePackageType` `APPL`, version strings from the original's version,
+  `LSMinimumSystemVersion` = the deployment target, `NSHighResolutionCapable` true.
+- **Deployment target:** set `CMAKE_OSX_DEPLOYMENT_TARGET` (e.g. `11.0`, the first arm64 macOS) as a cache
+  variable *before* `project()`; otherwise the binary only runs on the build machine's macOS version or newer.
+- **Game files:** copy only the folders the program reads, from `data/` (overridable cache path), into
+  `Contents/Resources/`. Inside a bundle `SDL_GetBasePath()` returns `Contents/Resources/`, so a game-folder
+  search that already checks "next to the executable" through `SDL_GetBasePath()` finds them unchanged.
+  Per-user files still go to `SDL_GetPrefPath`; the bundle is read-only once signed.
+- **Icon:** a small `uv run tools/make_icon.py <data> <out.icns>` script (PEP 723, Pillow, which writes ICNS)
+  that builds a 1024x1024 icon from the user's own copy: the original's icon resource, or a sprite from its
+  data (artwork about 80% of the canvas). Run it from the `app` target if `uv` is found, otherwise skip the
+  icon with a `message(STATUS ...)` rather than failing.
+- **It contains the original's assets:** keep it under the ignored `build/`, never commit or publish it, and
+  don't hand it to anyone else. The ad-hoc signature makes it run on the Mac that built it; on another Mac
+  Gatekeeper blocks it until right-click > Open (or `xattr -dr com.apple.quarantine <bundle>`).
+- Document the target in the reconstruction's README ("macOS app") with what it needs (`uv` for the icon)
+  and what it doesn't do (no notarisation, single architecture unless `CMAKE_OSX_ARCHITECTURES` says so).
 
 ## The hybrid route (DLL injection), in CMake
 - A `SHARED` library target built for the original's architecture (`-A Win32` with MSVC for 32-bit

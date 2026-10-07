@@ -7,6 +7,7 @@ tools:
 - Apple Clang 21 (Xcode Command Line Tools)
 - CMake 4.1
 - SDL 3.4.18
+- Pillow (ICNS icon)
 - ud 0.1.0
 agents:
 - Claude Code (Opus 5.5)
@@ -43,6 +44,14 @@ tedious in bulk.
   runs an x86-64 build if a difference might come from the architecture.
 - Per-user data: `SDL_GetPrefPath` returns `~/Library/Application Support/<org>/<app>/`. The Zuma build keeps
   profiles, saves and the former registry settings there (Linux: `~/.local/share/...`, Windows: `%APPDATA%`).
+- App bundle, only on request: the default build stays a bare executable. Zuma got a separate
+  `cmake --build build/mac --target app` (custom target, not `MACOSX_BUNDLE` on the main target) that copies
+  the executable, a configured `Info.plist` and the game folders from `data/` into
+  `Zuma Deluxe.app/Contents/{MacOS,Resources}`, makes `Zuma.icns` from the game's own frog sprite
+  (`images/SMALLFROGonPAD.gif` + its `_` alpha mask) with a `uv run` Pillow script, and signs the whole
+  bundle ad hoc last. `SDL_GetBasePath()` points at `Contents/Resources/` inside a bundle, so the existing
+  game-folder search found the files with no code change. `CMAKE_OSX_DEPLOYMENT_TARGET` 11.0, set before
+  `project()`, keeps it from requiring the build machine's macOS version.
 - Verification: TinyQuest's end-to-end check (`examples/tinyquest/run_example.py`) gives 7/7 identical
   outputs with Apple Clang 21 on arm64, and `ud init --scaffold` + `ud build` + a headless run pass.
 
@@ -60,7 +69,11 @@ tedious in bulk.
    always PIE and Apple's linker dropped `-s`. Fix: an `elseif(APPLE)` branch in CMake with
    `-Wl,-x` (removes local symbols) and no `-no-pie`; addresses then differ between runs, so compare
    behaviour, not pointers.
-4. **Things to expect in other code bases** (not hit by Zuma, but common in GCC-only code): `<malloc.h>`,
+4. **A bundle that was modified after signing doesn't start** (arm64 kills unsigned or tampered code).
+   Cause: copying data or the icon into the `.app` after `codesign`. Fix: sign the whole bundle as the
+   last step of the `app` target, and rebuild the bundle from scratch each time (`rm -rf` first). The
+   bundle holds the user's assets: it stays in the ignored `build/` and is never shared.
+5. **Things to expect in other code bases** (not hit by Zuma, but common in GCC-only code): `<malloc.h>`,
    `<endian.h>` and `fopen64` don't exist; `sem_init` fails; x86 intrinsics and inline assembly don't
    compile on arm64; Clang fuses `a * b + c` into multiply-add on arm64, which changes float results in the
    last bits (`-ffp-contract=off` when the oracle compares floats). Details in

@@ -194,3 +194,13 @@ the agent never decrypts. Same treatment as Denuvo/SteamStub on PC.
   `ruff check`, `examples/tinyquest/run_example.py` (7/7 MATCH), `ud init --scaffold` + `ud build` (SDL3
   fetched, Cocoa backend) + headless run, `ud tools check --route native`. **Not verified:** `ud run --shot` on
   macOS (it captures the whole screen; not run here) and the macOS CI jobs (not pushed).
+
+### macOS app bundle: on request only
+- **Decision:** the default macOS output stays a bare executable (what `ud build`, `ud run` and the oracle
+  use). A `.app` bundle is an extra CMake `app` custom target the agent adds only when the user asks, rather
+  than `MACOSX_BUNDLE` on the main target, which would move the executable for every build. Documented in
+  `cpp-port.md` ("App bundle"), the cpp-reconstruction checklist and the macOS field note, from the Zuma
+  Deluxe reconstruction's target (Info.plist template, data copied into `Contents/Resources`, icon from a
+  game sprite via a `uv run` Pillow script, ad-hoc signature applied last, deployment target 11.0).
+- No `ud` support (no `ud build --app`, no scaffold template): it is per-project packaging, and the bundle
+  contains the user's assets, so it should never be a default artefact.
